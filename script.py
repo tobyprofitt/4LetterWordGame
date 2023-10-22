@@ -23,13 +23,6 @@ def load_words(path):
     words = [word for word in words if word != '']
     return words
 
-def load_graph(path):
-    if not path:
-        path = GRAPH_PATH
-    with open(path, "rb") as file:
-        graph = pickle.load(file)
-    return graph
-
 def can_rearrange(word1, word2):
     return sorted(word1) == sorted(word2)
 
@@ -96,11 +89,18 @@ def save_graph(graph, path):
     with open(path, "wb") as file:
         pickle.dump(graph, file)
 
+def load_graph(path):
+    if not path:
+        path = GRAPH_PATH
+    with open(path, "rb") as file:
+        graph = pickle.load(file)
+    return graph
+
 def game_sequence(word_path, graph_path):
     # Introduction
     print("Welcome to the 4-Letter Word Path Game!")
     print("Your goal is to change the starting word to the ending word, one letter at a time, forming valid words along the way.")
-    print("You can also rearrange the letters to form a new word. Let's begin!")
+    print("You can also rearrange the letters to form a new word. Enter 'BACKWARD' to revert to the previous state. Let's begin!")
     print("="*50)
     
     words = load_words(word_path)
@@ -118,12 +118,15 @@ def game_sequence(word_path, graph_path):
     history = [start_word]
     score = 0
 
+    # Stack to save game states
+    game_states = [(history.copy(), score)]
+
     print(f"Starting word: {start_word}")
     print(f"Target word: {end_word}")
     print("="*50)
 
     while True:
-        next_word = input("Enter the next word in the sequence: ").upper().strip()
+        next_word = input("Enter the next word in the sequence or 'BACKWARD' to revert: ").upper().strip()
         if next_word in ('ESCAPE', 'ENTER'):
             print("Game ended.")
             optimal_path = find_shortest_path(graph, start_word, end_word)
@@ -131,10 +134,27 @@ def game_sequence(word_path, graph_path):
             print(f"Optimal Score: {len(optimal_path)-1}")
             break
 
+        # Implementing the 'BACKWARD' feature
+        if next_word == "BACKWARD":
+            if len(game_states) > 1:
+                game_states.pop()  # remove current state
+                history, score = game_states[-1]  # revert to previous state
+                history = history.copy()  # ensure we're working with a new list instance
+                print("\nReverted to previous state.")
+                print("\nWord History:")
+                print(" -> ".join(history))
+                print(f"\nCumulative Score: {score}")
+                print(f"Target Word: {end_word}\n")
+                print("="*50)
+            else:
+                print("\nYou're at the starting word. Can't go backward from here.")
+            continue
+
         # Check if the word is valid
         if next_word in graph[history[-1]]:
             history.append(next_word)
             score += 1
+            game_states.append((history.copy(), score))  # save the current game state
         else:
             print("Invalid transition. Try again.")
             continue

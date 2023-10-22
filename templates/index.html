@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Letter Word Path Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body onload="initializeGame()">
+    <h1>4-Letter Word Path Game</h1>
+
+    <p>Starting Word: <span id="start-word"></span></p>
+    <p>Target Word: <span id="end-word"></span></p>
+
+    <div>
+        <input type="text" id="user-input" maxlength="4">
+        <button onclick="submitWord()">Submit</button>
+    </div>
+
+    <h2>Word History:</h2>
+    <ul id="word-history"></ul>
+
+    <h2>Score: <span id="score">0</span></h2>
+</body>
+</html>
