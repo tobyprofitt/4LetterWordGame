@@ -3,7 +3,7 @@ import random
 from script import load_graph, load_words
 from collections import deque
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 # Game state variables
 current_word = ""
@@ -45,11 +45,11 @@ def get_num_shortest_paths(graph, start, end):
     # If we reach here, it means there's no path from start to end
     return shortest_paths
 
-@app.route('/')
+@application.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/initialize-game', methods=['GET'])
+@application.route('/initialize-game', methods=['GET'])
 def initialize_game():
     global start_word, current_word, target_word, word_history, score
 
@@ -68,7 +68,7 @@ def initialize_game():
         'endWord': target_word
     })
 
-@app.route('/play-move', methods=['POST'])
+@application.route('/play-move', methods=['POST'])
 def play_move():
     global current_word, score
 
@@ -96,7 +96,7 @@ def play_move():
         'score': score
     })
 
-@app.route('/undo-move', methods=['POST'])
+@application.route('/undo-move', methods=['POST'])
 def undo_move():
     global current_word, score, word_history
 
@@ -113,7 +113,7 @@ def undo_move():
     return jsonify(success=True)
 
 # Add this route to provide shortest paths
-@app.route('/shortest-paths', methods=['GET'])
+@application.route('/shortest-paths', methods=['GET'])
 def get_shortest_paths():
     paths = get_num_shortest_paths(graph, start_word, target_word)
     return jsonify({
@@ -122,11 +122,11 @@ def get_shortest_paths():
     })
 
 # Add this route to handle the "Give Up?" button
-@app.route('/give-up', methods=['POST'])
+@application.route('/give-up', methods=['POST'])
 def give_up():
     # Logic same as above
     return get_shortest_paths()
 
 # run app
 if __name__ == '__main__':
-    app.run()
+    application.run()
