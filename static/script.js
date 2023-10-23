@@ -106,10 +106,21 @@ function submitWord() {
             document.getElementById("score").textContent = data.score;
             document.getElementById("user-input").value = "";  // Clear the input
 
-            // Check if user reached the target word
-            if (userInput === endWord) {
-                alert("Congratulations! You reached the target word.");
-            }
+        // Check if user reached the target word
+        if (userInput === endWord) {
+            let gameBoard = document.getElementById("game-board");
+            gameBoard.classList.add("win-effect");
+
+            // Prevent adding another set of 4 boxes
+            document.getElementById("user-input").disabled = true;
+
+            // Display a restart prompt below the game board
+            let restartPrompt = document.createElement("div");
+            restartPrompt.id = "restart-prompt";
+            restartPrompt.innerHTML = '<p>Congratulations! Would you like to play again?</p><button onclick="restartGame()">Restart</button>';
+            document.body.appendChild(restartPrompt);
+        }
+
         } else {
             // Display error message
             errorMessage.textContent = "Invalid move. Try again.";
@@ -140,4 +151,65 @@ function submitWord() {
             }, 3000);
         }
     });
+}
+
+function restartGame() {
+    // Refresh the page to restart the game
+    location.reload();
+}
+
+function displayShortestPaths(data) {
+    let pathsList = document.getElementById("paths-list");
+    let optimalScore = document.getElementById("optimal-score");
+    
+    // Clear any previous paths
+    pathsList.innerHTML = "";
+
+    // Populate the paths
+    for (let path of data.paths) {
+        let li = document.createElement("li");
+        li.textContent = path.join(" -> ");
+        pathsList.appendChild(li);
+    }
+
+    // Display optimal score
+    optimalScore.textContent = data.score;
+
+    // Show the shortest paths section
+    document.getElementById("shortest-paths").style.display = "block";
+}
+
+document.getElementById("give-up-btn").addEventListener("click", function() {
+    fetch("/give-up", {
+        method: 'POST', // Add this line to specify the HTTP method
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayShortestPaths(data);
+    });
+});
+
+// Get the modal and its elements
+const modal = document.getElementById("rules-modal");
+const btn = document.getElementById("rules-btn");
+const closeBtn = document.getElementsByClassName("close-btn")[0];
+
+// When the user clicks on the button, open the modal
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// When the user clicks on <span> (x), close the modal
+closeBtn.onclick = function() {
+    modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
 }
