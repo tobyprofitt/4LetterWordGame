@@ -10,6 +10,24 @@ h1 {
     margin-bottom: 20px;
 }
 
+.word-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.letter-box {
+    width: 40px;
+    height: 40px;
+    display: inline-block;
+    border: 2px solid #000;
+    font-size: 20px;
+    text-align: center;
+    line-height: 40px;
+    margin: 0 5px;
+    background-color: #fff;
+}
+
 input[type="text"] {
     padding: 10px;
     font-size: 16px;
@@ -32,7 +50,54 @@ button:hover {
     background-color: #0056b3;
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
+/* Shake animation */
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-2px, 0px) rotate(1deg); }
+    30% { transform: translate(1px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-1px, 1px) rotate(0deg); }
+    70% { transform: translate(1px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.shake {
+    animation: shake 0.5s;
+    animation-iteration-count: 1;
+}
+
+/* Error message styling */
+#error-message {
+    display: none;
+    background-color: rgba(244, 67, 54, 0.8);  /* Semi-transparent red background */
+    color: white;             /* White text color */
+    margin: 10px 0;             /* Margin around the error message */
+    padding: 10px;              /* Padding inside the error message */
+    text-align: center;         /* Centered text */
+    border-radius: 5px;         /* Rounded corners */
+    font-size: 1.1em;           /* Slightly larger font */
+}
+
+/* Color gradient background */
+@keyframes gradientBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Pulsing effect */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+}
+
+.win-effect {
+    animation: gradientBackground 5s ease infinite, pulse 1s ease-in-out infinite;
+    background: linear-gradient(270deg, #83a4d4, #b6fbff);
+    background-size: 200% 200%;
 }

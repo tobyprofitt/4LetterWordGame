@@ -9,17 +9,46 @@
 </head>
 <body onload="initializeGame()">
     <h1>4-Letter Word Path Game</h1>
+    <div id="error-message"></div>
 
-    <p>Starting Word: <span id="start-word"></span></p>
-    <p>Target Word: <span id="end-word"></span></p>
+    <div id="game-board">
+        <!-- Starting word -->
+        <div class="word-row" id="start-word-row">
+            <div class="letter-box" id="start-letter-1"></div>
+            <div class="letter-box" id="start-letter-2"></div>
+            <div class="letter-box" id="start-letter-3"></div>
+            <div class="letter-box" id="start-letter-4"></div>
+        </div>
+
+        <!-- User's guess history will be dynamically added here -->
+
+        <!-- Input squares for user's current guess -->
+        <div class="word-row" id="input-word-row">
+            <div class="letter-box" id="input-letter-1"></div>
+            <div class="letter-box" id="input-letter-2"></div>
+            <div class="letter-box" id="input-letter-3"></div>
+            <div class="letter-box" id="input-letter-4"></div>
+        </div>
+
+        <!-- Dots separator -->
+        <div style="text-align: center; margin: 20px 0;">
+            ...
+        </div>
+
+        <!-- Target word -->
+        <div class="word-row" id="end-word-row">
+            <div class="letter-box" id="end-letter-1"></div>
+            <div class="letter-box" id="end-letter-2"></div>
+            <div class="letter-box" id="end-letter-3"></div>
+            <div class="letter-box" id="end-letter-4"></div>
+        </div>
+    </div>
 
     <div>
         <input type="text" id="user-input" maxlength="4">
         <button onclick="submitWord()">Submit</button>
+        <button onclick="undoLastMove()">Undo</button>
     </div>
-
-    <h2>Word History:</h2>
-    <ul id="word-history"></ul>
 
     <h2>Score: <span id="score">0</span></h2>
 </body>

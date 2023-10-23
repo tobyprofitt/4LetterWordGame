@@ -19,10 +19,11 @@ def index():
 
 @app.route('/initialize-game', methods=['GET'])
 def initialize_game():
-    global current_word, target_word, word_history, score
+    global start_word, current_word, target_word, word_history, score
 
     # Randomly select start and end words
-    current_word = random.choice(words)
+    start_word = random.choice(words)
+    current_word = start_word
     target_word = random.choice(words)
     while current_word == target_word:
         target_word = random.choice(words)
@@ -39,7 +40,15 @@ def initialize_game():
 def play_move():
     global current_word, score
 
-    move = request.json['move']
+    data = request.json
+    move = data['move']
+    frontend_score = data['score']
+
+    # If the received score is less than the backend's score, 
+    # it means the user has used the "Undo" button.
+    # Update the backend's score to match the frontend's score
+    if frontend_score < score:
+        score = frontend_score
 
     # Check if the move is valid
     if move in graph[current_word]:
@@ -54,6 +63,22 @@ def play_move():
         'valid': valid_move,
         'score': score
     })
+
+@app.route('/undo-move', methods=['POST'])
+def undo_move():
+    global current_word, score, word_history
+
+    # Decrement the score
+    score -= 1
+
+    # Remove the latest word from the history
+    if word_history:
+        word_history.pop()
+
+    # Set current_word to the latest word in the history, or the starting word if history is empty
+    current_word = word_history[-1] if word_history else start_word
+
+    return jsonify(success=True)
 
 # run app
 if __name__ == '__main__':
