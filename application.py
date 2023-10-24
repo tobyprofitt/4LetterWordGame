@@ -1,15 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 import random
 from script import load_graph, load_words
 from collections import deque
 
 application = Flask(__name__)
-
-# Game state variables
-current_word = ""
-target_word = ""
-word_history = []
-score = 0
+application.secret_key = 'secret_key1'
 
 words = load_words('wordsdetail2.txt')
 graph = load_graph('wordsdetail_graph.pkl')
@@ -51,12 +46,18 @@ def index():
 
 @application.route('/initialize-game', methods=['GET'])
 def initialize_game():
-    global start_word, current_word, target_word, word_history, score
-
     # Randomly select start and end words
     start_word = random.choice(words)
     current_word = start_word
     target_word = random.choice(words)
+
+    # Set session variables
+    session['start_word'] = start_word
+    session['current_word'] = current_word
+    session['target_word'] = target_word
+    session['word_history'] = [current_word]
+    session['score'] = 0
+
     while current_word == target_word:
         target_word = random.choice(words)
 
@@ -70,11 +71,12 @@ def initialize_game():
 
 @application.route('/play-move', methods=['POST'])
 def play_move():
-    global current_word, score
-
     data = request.json
     move = data['move']
     frontend_score = data['score']
+    word_history = session['word_history']
+    score = session['score']
+    current_word = session['current_word']
 
     # If the received score is less than the backend's score, 
     # it means the user has used the "Undo" button.
@@ -91,6 +93,11 @@ def play_move():
     else:
         valid_move = False
 
+    # Update session variables
+    session['current_word'] = current_word
+    session['score'] = score
+    session['word_history'] = word_history
+
     return jsonify({
         'valid': valid_move,
         'score': score
@@ -98,7 +105,11 @@ def play_move():
 
 @application.route('/undo-move', methods=['POST'])
 def undo_move():
-    global current_word, score, word_history
+    # Load session variables
+    start_word = session['start_word']
+    current_word = session['current_word']
+    score = session['score']
+    word_history = session['word_history']
 
     # Decrement the score
     score -= 1
@@ -110,11 +121,18 @@ def undo_move():
     # Set current_word to the latest word in the history, or the starting word if history is empty
     current_word = word_history[-1] if word_history else start_word
 
+    # Update session variables
+    session['current_word'] = current_word
+    session['score'] = score
+    session['word_history'] = word_history
+
     return jsonify(success=True)
 
 # Add this route to provide shortest paths
 @application.route('/shortest-paths', methods=['GET'])
 def get_shortest_paths():
+    start_word = session['start_word']
+    target_word = session['target_word']
     paths = get_num_shortest_paths(graph, start_word, target_word)
     return jsonify({
         'paths': paths,
