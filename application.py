@@ -9,7 +9,7 @@ application.secret_key = 'secret_key1'
 words = load_words('wordsdetail2.txt')
 graph = load_graph('wordsdetail_graph.pkl')
 
-def get_shortest_paths(graph, start, end):
+def get_shortest_paths_ops(graph, start, end):
     # Function that returns all the shortest paths
     visited = set()
     paths = []
@@ -133,7 +133,7 @@ def undo_move():
 def get_shortest_paths():
     start_word = session['start_word']
     target_word = session['target_word']
-    paths = get_shortest_paths(graph, start_word, target_word)
+    paths = get_shortest_paths_ops(graph, start_word, target_word)
     return jsonify({
         'paths': paths,
         'score': len(paths[0]) - 1 if paths else 0
@@ -147,4 +147,4 @@ def give_up():
 
 # run app
 if __name__ == '__main__':
-    application.run()
+    application.run(debug=True)
