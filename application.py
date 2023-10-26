@@ -9,8 +9,8 @@ application.secret_key = 'secret_key1'
 words = load_words('wordsdetail2.txt')
 graph = load_graph('wordsdetail_graph.pkl')
 
-# Write a function that will calculate how many shortests paths there are from a word to another word and return all the paths
-def get_num_shortest_paths(graph, start, end):
+def get_shortest_paths(graph, start, end):
+    # Function that returns all the shortest paths
     visited = set()
     paths = []
     queue = deque([(start, [start])])  # Each element in the queue is a tuple (current_word, path_so_far)
@@ -51,15 +51,15 @@ def initialize_game():
     current_word = start_word
     target_word = random.choice(words)
 
+    while current_word == target_word:
+        target_word = random.choice(words)
+
     # Set session variables
     session['start_word'] = start_word
     session['current_word'] = current_word
     session['target_word'] = target_word
     session['word_history'] = [current_word]
     session['score'] = 0
-
-    while current_word == target_word:
-        target_word = random.choice(words)
 
     word_history = [current_word]
     score = 0
@@ -133,7 +133,7 @@ def undo_move():
 def get_shortest_paths():
     start_word = session['start_word']
     target_word = session['target_word']
-    paths = get_num_shortest_paths(graph, start_word, target_word)
+    paths = get_shortest_paths(graph, start_word, target_word)
     return jsonify({
         'paths': paths,
         'score': len(paths[0]) - 1 if paths else 0
