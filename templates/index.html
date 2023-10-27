@@ -13,15 +13,49 @@
     <div class="helper-container">
         <button id="rules-btn" class="helper-btn">?</button>
     </div>
-    <div id="rules-modal" class="modal">
+    <!-- Helper Modal -->
+    <div class="modal" id="helperModal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>WordWays Rules</h2>
-            <p>Connect the starting word to the target word by changing one letter at a time. Every new word formed must be a valid English word. You can also rearrange the letters to form a different valid word.</p>
-            <p>Your goal is to transform the starting word into the target word in as few moves as possible. Your score is the number of moves you've made. Try to reach the target word with the lowest score possible!</p>
-            <p>If you're stuck, you can click the "Give Up?" button to see the shortest path to the target word. Have fun and challenge yourself to improve your score with each game!</p>
+            <span class="close-button">&times;</span>
+            <h2>How to Play WordWay</h2>
+            <p>In WordWay, your task is to transform a starting word into a target word. You can change one letter at a time, and every intermediate step must be a valid word. You can also rearrange the letters of a word to form another valid word.</p>
+
+            <!-- Visual example -->
+            <div class="example">
+                <h3>Example:</h3>
+                <div class="word-box">
+                    <div class="letter-box">L</div>
+                    <div class="letter-box">I</div>
+                    <div class="letter-box">M</div>
+                    <div class="letter-box">E</div>
+                </div>
+                <p>&darr; (rearrange)</p>
+                <div class="word-box">
+                    <div class="letter-box">M</div>
+                    <div class="letter-box">I</div>
+                    <div class="letter-box">L</div>
+                    <div class="letter-box">E</div>
+                </div>
+                <p>&darr;</p>
+                <div class="word-box">
+                    <div class="letter-box">M</div>
+                    <div class="letter-box">I</div>
+                    <div class="letter-box">L</div>
+                    <div class="letter-box">K</div>
+                </div>
+                <p>&darr;</p>
+                <div class="word-box">
+                    <div class="letter-box">S</div>
+                    <div class="letter-box">I</div>
+                    <div class="letter-box">L</div>
+                    <div class="letter-box">K</div>
+                </div>
+            </div>
+
+            <p>Every move increases your score by one. Try to transform the starting word into the target word in the fewest moves possible!</p>
         </div>
-    </div>    
+    </div>
+
     <div id="error-message"></div>
 
     <div id="game-board">

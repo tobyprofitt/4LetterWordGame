@@ -192,24 +192,30 @@ document.getElementById("give-up-btn").addEventListener("click", function() {
     });
 });
 
-// Get the modal and its elements
-const modal = document.getElementById("rules-modal");
-const btn = document.getElementById("rules-btn");
-const closeBtn = document.getElementsByClassName("close-btn")[0];
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the modal and its elements
+    const modal = document.getElementById("helperModal");
+    const btn = document.getElementById("rules-btn");
+    const closeBtn = document.getElementsByClassName("close-button")[0];
 
-// When the user clicks on the button, open the modal
-btn.onclick = function() {
-    modal.style.display = "block";
-}
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
 
-// When the user clicks on <span> (x), close the modal
-closeBtn.onclick = function() {
-    modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-    if (event.target == modal) {
+    // When the user clicks on <span> (x), close the modal
+    closeBtn.onclick = function() {
         modal.style.display = "none";
     }
-}
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+});
+
+console.log("modal:", modal);
+console.log("btn:", btn);
+console.log("closeBtn:", closeBtn);
