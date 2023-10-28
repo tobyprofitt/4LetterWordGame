@@ -2,43 +2,15 @@ from flask import Flask, render_template, request, jsonify, session
 import random
 from script import load_graph, load_words
 from collections import deque
+import json 
+import datetime
 
 application = Flask(__name__)
 application.secret_key = 'secret_key1'
 
 words = load_words('wordsdetail2.txt')
 graph = load_graph('wordsdetail_graph.pkl')
-
-def get_shortest_paths_ops(graph, start, end):
-    # Function that returns all the shortest paths
-    visited = set()
-    paths = []
-    queue = deque([(start, [start])])  # Each element in the queue is a tuple (current_word, path_so_far)
-
-    while queue:
-        current_word, path = queue.popleft()
-
-        # If the current word is the end word, we've found a path
-        if current_word == end:
-            paths.append(path)
-
-        # Mark the current word as visited
-        visited.add(current_word)
-
-        # Add all neighboring words to the queue, if they haven't been visited yet
-        for neighbor in graph[current_word]:
-            if neighbor not in visited:
-                queue.append((neighbor, path + [neighbor]))
-
-    # Get all shortest paths
-    shortest_paths = []
-    min_length = min(len(path) for path in paths)
-    for path in paths:
-        if len(path) == min_length:
-            shortest_paths.append(path)
-
-    # If we reach here, it means there's no path from start to end
-    return shortest_paths
+word_freq = json.load(open('word_freq.json', 'r'))
 
 @application.route('/')
 def index():
@@ -46,10 +18,18 @@ def index():
 
 @application.route('/initialize-game', methods=['GET'])
 def initialize_game():
-    # Randomly select start and end words
-    start_word = random.choice(words)
+    
+    is_daily = True
+    if is_daily:
+        # Use the current date as a seed
+        today = datetime.date.today()
+        seed = int(today.strftime('%Y%m%d'))
+        random.seed(seed)
+
+    # Randomly select start and end words using weights from word_freq
+    start_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
     current_word = start_word
-    target_word = random.choice(words)
+    target_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
 
     while current_word == target_word:
         target_word = random.choice(words)
@@ -144,6 +124,37 @@ def get_shortest_paths():
 def give_up():
     # Logic same as above
     return get_shortest_paths()
+
+def get_shortest_paths_ops(graph, start, end):
+    # Function that returns all the shortest paths
+    visited = set()
+    paths = []
+    queue = deque([(start, [start])])  # Each element in the queue is a tuple (current_word, path_so_far)
+
+    while queue:
+        current_word, path = queue.popleft()
+
+        # If the current word is the end word, we've found a path
+        if current_word == end:
+            paths.append(path)
+
+        # Mark the current word as visited
+        visited.add(current_word)
+
+        # Add all neighboring words to the queue, if they haven't been visited yet
+        for neighbor in graph[current_word]:
+            if neighbor not in visited:
+                queue.append((neighbor, path + [neighbor]))
+
+    # Get all shortest paths
+    shortest_paths = []
+    min_length = min(len(path) for path in paths)
+    for path in paths:
+        if len(path) == min_length:
+            shortest_paths.append(path)
+
+    # If we reach here, it means there's no path from start to end
+    return shortest_paths
 
 # run app
 if __name__ == '__main__':
