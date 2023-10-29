@@ -73,7 +73,7 @@ button:hover {
 /* Error message styling */
 #error-message {
     display: none;
-    background-color: rgba(244, 67, 54, 0.8);  /* Semi-transparent red background */
+    background-color: #e57373;  /* Semi-transparent red background */
     color: white;             /* White text color */
     margin: 10px 0;             /* Margin around the error message */
     padding: 10px;              /* Padding inside the error message */
@@ -162,7 +162,7 @@ button:hover {
 
 .helper-btn {
     font-size: 20px;
-    background-color: #f3f4f6;  /* Light gray background */
+    background-color: #007BFF;  /* Light gray background */
     border: 2px solid #d1d5db;  /* Gray border */
     border-radius: 50%;         /* Make it circular */
     width: 30px;                /* Fixed width */
@@ -228,4 +228,63 @@ button:hover {
 .word-box {
     display: inline-flex;
     margin: 5px;
+}
+
+.difficulty-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.difficulty {
+    padding: 10px 20px;
+    margin: 0 10px;
+    cursor: pointer;
+    background-color: grey; /* default state */
+}
+
+.difficulty.active {
+    background-color: blue; /* active state (available to click) */
+}
+
+.difficulty.completed {
+    background-color: green; /* completed state */
+}
+
+/* add hover to all difficulty buttons */
+.difficulty:hover {
+    background-color: #e57373;
+}
+
+.difficulty-button {
+    background-color: grey;  /* default color when game is not started */
+    /* ... other styles ... */
+}
+
+.difficulty-button.active {
+    background-color: #007BFF;  /* color when the level is active */
+}
+
+.difficulty-button.completed {
+    background-color: green;  /* color when the level is completed */
+}
+
+#share-score {
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+
+#copy-score-btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+#copy-score-btn:hover {
+    background-color: #0056b3;
 }

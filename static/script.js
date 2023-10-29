@@ -1,5 +1,12 @@
 let startWord = "";  // Filled by the server
 let endWord = "";    // Filled by the server
+let currentDifficulty = "easy"; // or initialize with a default value if necessary
+let medium_available = false;
+let hard_available = false;
+let easy_score = 0;
+let medium_score = 0;
+let hard_score = 0;
+let currentDate = new Date().toISOString().slice(0,10); // YYYY-MM-DD format
 
 document.getElementById("user-input").addEventListener("keyup", function(event) {
     if (event.key === "Enter") {
@@ -8,8 +15,40 @@ document.getElementById("user-input").addEventListener("keyup", function(event) 
     }
 });
 
-function initializeGame() {
-    fetch('/initialize-game')
+function clearBoard() {
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById("start-letter-" + i).textContent = "";
+        document.getElementById("end-letter-" + i).textContent = "";
+    }
+    let gameBoard = document.getElementById("game-board");
+    let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
+    for (let row of historyRows) {
+        gameBoard.removeChild(row);
+    }
+    gameBoard.classList.remove("win-effect");
+    document.getElementById("score").textContent = 0;
+    document.getElementById("user-input").disabled = false;
+    /* Drop the restart prompt */
+    let restartPrompt = document.getElementById("restart-prompt");
+    if (restartPrompt) {
+        document.body.removeChild(restartPrompt);
+    }
+    /* Hide the shortest paths section */
+    document.getElementById("shortest-paths").style.display = "none";
+    /* Hide the share section */
+    document.getElementById("share-score").style.display = "none";
+}
+
+function initializeGame(difficulty="easy") {
+    if (difficulty === "easy") {
+        medium_available = false;
+        hard_available = false;
+    } else if (difficulty === "medium") {
+        hard_available = false;
+    }
+    console.log("initializeGame called");
+    clearBoard();
+    fetch(`/initialize-game?difficulty=${difficulty}&date=${currentDate}`)
     .then(response => response.json())
     .then(data => {
         startWord = data.startWord;
@@ -19,6 +58,30 @@ function initializeGame() {
         populateWordSquares("start-letter-", startWord);
         populateWordSquares("end-letter-", endWord);
     });
+    console.log("initializeGame finished");
+}
+
+// Function to reset all difficulty button states to default
+function resetDifficultyButtons() {
+    document.getElementById("easy").classList.remove("active", "completed");
+    document.getElementById("medium").classList.remove("active", "completed");
+    document.getElementById("hard").classList.remove("active", "completed");
+}
+
+// Function to update the button state based on the current difficulty
+function updateDifficultyButtonState(difficulty) {
+    resetDifficultyButtons();
+    
+    if (difficulty === "easy") {
+        document.getElementById("easy").classList.add("active");
+    } else if (difficulty === "medium") {
+        document.getElementById("easy").classList.add("completed");
+        document.getElementById("medium").classList.add("active");
+    } else if (difficulty === "hard") {
+        document.getElementById("easy").classList.add("completed");
+        document.getElementById("medium").classList.add("completed");
+        document.getElementById("hard").classList.add("active");
+    }
 }
 
 function populateWordSquares(prefix, word) {
@@ -114,11 +177,45 @@ function submitWord() {
             // Prevent adding another set of 4 boxes
             document.getElementById("user-input").disabled = true;
 
+            // Enable the next difficulty
+            if (currentDifficulty === "easy") {
+                easy_score = currentScore+1;
+                updateDifficultyButtonState("medium");
+                document.getElementById("medium").classList.add("active");
+                medium_available = true
+            } else if (currentDifficulty === "medium") {
+                medium_score = currentScore+1;
+                updateDifficultyButtonState("hard");
+                document.getElementById("hard").classList.add("active");
+                hard_available = true
+            } else if (currentDifficulty === "hard") {
+                hard_score = currentScore+1;
+                // Display share section
+                document.getElementById("share-score").style.display = "block";
+                document.getElementById("share-score-value").textContent = currentScore+1;  // Assuming currentScore holds the current score
+            }
+
+            // Handle user clicks on difficulty levels (from Step 2.3)
+            const difficulties = document.querySelectorAll(".difficulty");
+
+            difficulties.forEach(difficulty => {
+                difficulty.addEventListener("click", function() {
+                    if (difficulty.classList.contains("active")) {
+                        // Make a request to the backend to update the session's difficulty and get new words
+                        currentDifficulty = difficulty.id; // set the current difficulty
+
+                        // You can now make a request to /initialize-game again to get words for this difficulty
+                        // This will be similar to the request you make when the game starts
+                        // After receiving the response, update the game UI accordingly
+                    }
+                });
+            });
+
             // Display a restart prompt below the game board
-            let restartPrompt = document.createElement("div");
-            restartPrompt.id = "restart-prompt";
-            restartPrompt.innerHTML = '<p>Congratulations! Would you like to play again?</p><button onclick="restartGame()">Restart</button>';
-            document.body.appendChild(restartPrompt);
+            //let restartPrompt = document.createElement("div");
+            //restartPrompt.id = "restart-prompt";
+            //restartPrompt.innerHTML = '<p>Congratulations! Would you like to play again?</p><button onclick="restartGame()">Restart</button>';
+            //document.body.appendChild(restartPrompt);
         }
 
         } else {
@@ -165,11 +262,30 @@ function displayShortestPaths(data) {
     // Clear any previous paths
     pathsList.innerHTML = "";
 
-    // Populate the paths
+    // Group the paths by score
+    let pathsByScore = {};
     for (let path of data.paths) {
-        let li = document.createElement("li");
-        li.textContent = path.join(" -> ");
-        pathsList.appendChild(li);
+        let score = path.length - 1;
+        if (!pathsByScore[score]) {
+            pathsByScore[score] = [];
+        }
+        pathsByScore[score].push(path);
+    }
+
+    // Populate the paths
+    for (let score in pathsByScore) {
+        // Create a list item for the score
+        let scoreLi = document.createElement("li");
+        scoreLi.textContent = "Score: " + score;
+        scoreLi.style.fontWeight = "bold";
+        pathsList.appendChild(scoreLi);
+
+        // Create list items for the paths
+        for (let path of pathsByScore[score]) {
+            let pathLi = document.createElement("li");
+            pathLi.textContent = path.join(" -> ");
+            pathsList.appendChild(pathLi);
+        }
     }
 
     // Display optimal score
@@ -216,6 +332,73 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-console.log("modal:", modal);
-console.log("btn:", btn);
-console.log("closeBtn:", closeBtn);
+document.getElementById("medium").addEventListener("click", function() {
+    if (medium_available) {
+        currentDifficulty = "medium";
+        updateDifficultyButtonState(currentDifficulty);
+        initializeGame(currentDifficulty);  // Start the game for medium difficulty
+    } else {
+        /* Show error message for 3 seconds and then delete*/
+        let errorMessage = document.getElementById("difficulty-error-message");
+        errorMessage.style.display = "block";
+        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
+        setTimeout(() => {
+            let fadeEffect = setInterval(function () {
+                if (!errorMessage.style.opacity) {
+                    errorMessage.style.opacity = "1";
+                }
+                if (errorMessage.style.opacity > "0") {
+                    errorMessage.style.opacity -= "0.05";
+                } else {
+                    clearInterval(fadeEffect);
+                    errorMessage.style.display = "none";
+                }
+            }, 50);
+        }, 3000);
+    }
+});
+
+document.getElementById("hard").addEventListener("click", function() {
+    if (hard_available) {
+        currentDifficulty = "hard";
+        medium_available = false;
+        updateDifficultyButtonState(currentDifficulty);
+        initializeGame(currentDifficulty);  // Start the game for hard difficulty
+    } else {
+        /* Show error message for 3 seconds and then delete*/
+        let errorMessage = document.getElementById("difficulty-error-message");
+        errorMessage.style.display = "block";
+        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
+        setTimeout(() => {
+            let fadeEffect = setInterval(function () {
+                if (!errorMessage.style.opacity) {
+                    errorMessage.style.opacity = "1";
+                }
+                if (errorMessage.style.opacity > "0") {
+                    errorMessage.style.opacity -= "0.05";
+                } else {
+                    clearInterval(fadeEffect);
+                    errorMessage.style.display = "none";
+                }
+            }, 50);
+        }, 3000);
+    }
+});
+
+// Function to copy score to clipboard
+function copyScoreToClipboard() {
+    const scoreValue = document.getElementById("share-score-value").textContent;
+    const textArea = document.createElement("textarea");
+    textArea.value = `I scored ${easy_score}, ${medium_score} and ${hard_score} on WordWays! Try and beat my score at wordwaysgame.com`;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    document.getElementById("copy-success").style.display = "block";  // Display success message
+    setTimeout(() => {  // Hide success message after 2 seconds
+        document.getElementById("copy-success").style.display = "none";
+    }, 2000);
+}
+
+// Event listener for the "Copy Score to Clipboard" button
+document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);

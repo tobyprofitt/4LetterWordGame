@@ -13,6 +13,20 @@
     <div class="helper-container">
         <button id="rules-btn" class="helper-btn">?</button>
     </div>
+
+    <div id="share-score" style="display:none;">
+        <p>Congratulations on your win!</p>
+        <p>Your score: <span id="share-score-value"></span></p>
+        <button id="copy-score-btn">Copy Score to Clipboard</button>
+        <p id="copy-success" style="color:green; display:none;">Score copied!</p>
+    </div>
+
+    <button id="easy" class="difficulty-button active">Easy</button>
+    <button id="medium" class="difficulty-button">Medium</button>
+    <button id="hard" class="difficulty-button">Hard</button>
+
+    <br><br>
+
     <!-- Helper Modal -->
     <div class="modal" id="helperModal">
         <div class="modal-content">
@@ -54,11 +68,13 @@
 
             <p>Every move increases your score by one. Try to transform the starting word into the target word in the fewest moves possible!</p>
 
+            <p>Complete Easy difficulty to unlock Medium, then click on Medium to start a harder challenge, finally move on to Hard mode the same way.</p>
             <p>For a full list of valid 4-letter words, refer to this <a href="https://www.wordsdetail.com/4-letter-words/" target="_blank">dictionary</a>.</p>
         </div>
     </div>
 
     <div id="error-message"></div>
+    <div id="difficulty-error-message" style="display: none; color: red; margin-top: 10px;">Please complete the current difficulty first!</div>
 
     <div id="game-board">
         <!-- Starting word -->
@@ -105,7 +121,6 @@
         <button id="give-up-btn">Give Up?</button>
     </div>
 
-    <!-- Placeholder for displaying shortest paths -->
     <div id="shortest-paths">
         <h3>Shortest Path(s):</h3>
         <ul id="paths-list"></ul>

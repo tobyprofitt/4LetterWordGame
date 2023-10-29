@@ -3,7 +3,6 @@ import random
 from script import load_graph, load_words
 from collections import deque
 import json 
-import datetime
 
 application = Flask(__name__)
 application.secret_key = 'secret_key1'
@@ -18,21 +17,35 @@ def index():
 
 @application.route('/initialize-game', methods=['GET'])
 def initialize_game():
-    
     is_daily = True
+    user_date = request.args.get('date')
     if is_daily:
         # Use the current date as a seed
-        today = datetime.date.today()
-        seed = int(today.strftime('%Y%m%d'))
+        seed = int(user_date.replace('-', ''))  # Convert YYYY-MM-DD to YYYYMMDD
         random.seed(seed)
 
-    # Randomly select start and end words using weights from word_freq
-    start_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
-    current_word = start_word
-    target_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
+    difficulty = request.args.get('difficulty', 'easy')
 
-    while current_word == target_word:
-        target_word = random.choice(words)
+    while True:
+        # Randomly select start and end words using weights from word_freq
+        start_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
+        current_word = start_word
+        target_word = random.choices(words, weights=[word_freq[word] for word in words])[0]
+        while current_word == target_word:
+            target_word = random.choice(words)
+
+        path = find_shortest_path(graph, start_word, target_word)
+        print(path)
+
+        if path:
+            shortest_path_length = len(path) - 1
+
+        if difficulty == 'easy' and shortest_path_length <= 4:
+            break
+        elif difficulty == 'medium' and 5 <= shortest_path_length <= 6:
+            break
+        elif difficulty == 'hard' and shortest_path_length >= 7:
+            break
 
     # Set session variables
     session['start_word'] = start_word
@@ -41,7 +54,6 @@ def initialize_game():
     session['word_history'] = [current_word]
     session['score'] = 0
 
-    word_history = [current_word]
     score = 0
 
     return jsonify({
@@ -125,8 +137,37 @@ def give_up():
     # Logic same as above
     return get_shortest_paths()
 
+##### Helper functions #####
+
+def find_shortest_path(graph, start, end):
+    """
+    Find the shortest path between start and end words using BFS.
+    """
+    visited = set()
+    queue = deque([(start, [start])])  # Each element in the queue is a tuple (current_word, path_so_far)
+
+    print('Finding shortest path from {} to {}'.format(start, end))
+    while queue:
+        current_word, path = queue.popleft()
+
+        # If the current word is the end word, we've found a path
+        if current_word == end:
+            return path
+
+        # Mark the current word as visited
+        visited.add(current_word)
+
+        # Add all neighboring words to the queue, if they haven't been visited yet
+        for neighbor in graph[current_word]:
+            if neighbor not in visited:
+                queue.append((neighbor, path + [neighbor]))
+
+    # If we reach here, it means there's no path from start to end
+    return None
+
 def get_shortest_paths_ops(graph, start, end):
     # Function that returns all the shortest paths
+    print("Finding shortest paths from {} to {}".format(start, end))
     visited = set()
     paths = []
     queue = deque([(start, [start])])  # Each element in the queue is a tuple (current_word, path_so_far)
@@ -146,15 +187,15 @@ def get_shortest_paths_ops(graph, start, end):
             if neighbor not in visited:
                 queue.append((neighbor, path + [neighbor]))
 
-    # Get all shortest paths
-    shortest_paths = []
-    min_length = min(len(path) for path in paths)
-    for path in paths:
-        if len(path) == min_length:
-            shortest_paths.append(path)
+    # # Get all shortest paths
+    # shortest_paths = []
+    # min_length = min(len(path) for path in paths)
+    # for path in paths:
+    #     if len(path) == min_length:
+    #         shortest_paths.append(path)
 
     # If we reach here, it means there's no path from start to end
-    return shortest_paths
+    return paths
 
 # run app
 if __name__ == '__main__':
