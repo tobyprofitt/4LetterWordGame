@@ -288,3 +288,33 @@ button:hover {
 #copy-score-btn:hover {
     background-color: #0056b3;
 }
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: visible;
+    width: 320px;
+    background-color: #0071b3;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 5px 0;
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 2;
+    top: 10px;
+    left: 200%;
+
+    /* Set your desired font size here */
+    font-size: 11px; /* Adjust this as needed */
+}
+
+.tooltip:hover .tooltiptext {
+    display: block;
+}

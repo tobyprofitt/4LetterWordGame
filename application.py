@@ -4,6 +4,8 @@ from script import load_graph, load_words
 from collections import deque
 import json 
 
+IS_DAILY = True
+
 application = Flask(__name__)
 application.secret_key = 'secret_key1'
 
@@ -17,14 +19,14 @@ def index():
 
 @application.route('/initialize-game', methods=['GET'])
 def initialize_game():
-    is_daily = True
     user_date = request.args.get('date')
-    if is_daily:
+    print("User date is {}".format(user_date))
+    difficulty = request.args.get('difficulty', 'easy')
+
+    if IS_DAILY and difficulty != 'infinite':
         # Use the current date as a seed
         seed = int(user_date.replace('-', ''))  # Convert YYYY-MM-DD to YYYYMMDD
         random.seed(seed)
-
-    difficulty = request.args.get('difficulty', 'easy')
 
     while True:
         # Randomly select start and end words using weights from word_freq
@@ -40,11 +42,14 @@ def initialize_game():
         if path:
             shortest_path_length = len(path) - 1
 
-        if difficulty == 'easy' and shortest_path_length <= 4:
+        print("Difficulty is {}".format(difficulty))
+        if difficulty == 'easy' and shortest_path_length == 3:
             break
-        elif difficulty == 'medium' and 5 <= shortest_path_length <= 6:
+        elif difficulty == 'medium' and 4 <= shortest_path_length <= 5:
             break
-        elif difficulty == 'hard' and shortest_path_length >= 7:
+        elif difficulty == 'hard' and shortest_path_length >= 6:
+            break
+        elif difficulty == 'infinite':
             break
 
     # Set session variables

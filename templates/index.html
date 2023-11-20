@@ -24,6 +24,7 @@
     <button id="easy" class="difficulty-button active">Easy</button>
     <button id="medium" class="difficulty-button">Medium</button>
     <button id="hard" class="difficulty-button">Hard</button>
+    <button id="infinite" class="difficulty-button">Infinite</button>
 
     <br><br>
 
@@ -31,8 +32,8 @@
     <div class="modal" id="helperModal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h2>How to Play WordWay</h2>
-            <p>In WordWay, your task is to transform a starting word into a target word. You can change one letter at a time, and every intermediate step must be a valid word. You can also rearrange the letters of a word to form another valid word.</p>
+            <h2>How to Play WordWays</h2>
+            <p>In WordWays, your task is to transform a starting word into a target word. You can change one letter at a time, and every intermediate step must be a valid word. You can also rearrange the letters of a word to form another valid word.</p>
 
             <!-- Visual example -->
             <div class="example">
@@ -109,6 +110,7 @@
         </div>
     </div>
 
+    <!-- User Input -->
     <div>
         <input type="text" id="user-input" maxlength="4">
         <button onclick="submitWord()">Submit</button>

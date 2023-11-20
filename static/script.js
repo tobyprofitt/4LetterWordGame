@@ -7,6 +7,7 @@ let easy_score = 0;
 let medium_score = 0;
 let hard_score = 0;
 let currentDate = new Date().toISOString().slice(0,10); // YYYY-MM-DD format
+let wordDefinitions = {};
 
 document.getElementById("user-input").addEventListener("keyup", function(event) {
     if (event.key === "Enter") {
@@ -14,6 +15,41 @@ document.getElementById("user-input").addEventListener("keyup", function(event) 
         submitWord();
     }
 });
+
+function loadWordDefinitions() {
+    // Path to your word_definitions.json file
+    fetch('static/word_definitions.json')
+    .then(response => response.json())
+    .then(data => {
+        wordDefinitions = data;
+    })
+    .catch(error => console.error('Error loading word definitions:', error));
+}
+
+function addHoverToWord(wordElement) {
+    console.log("addHoverToWord called");
+    wordElement.addEventListener('mouseenter', function() {
+        const word = wordElement.getAttribute('data-word');
+        const definitions = wordDefinitions[word];
+        const definitionText = definitions && definitions.length > 0 ? definitions[0] : 'Definition not available.';
+
+        const tooltipText = document.createElement('span');
+        tooltipText.className = 'tooltiptext';
+        tooltipText.textContent = definitionText;
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        wordElement.appendChild(tooltip);
+        tooltip.appendChild(tooltipText);
+    });
+
+    wordElement.addEventListener('mouseleave', function() {
+        const tooltip = wordElement.querySelector('.tooltip');
+        if (tooltip) {
+            wordElement.removeChild(tooltip);
+        }
+    });
+}
 
 function clearBoard() {
     for (let i = 1; i <= 4; i++) {
@@ -52,7 +88,9 @@ function initializeGame(difficulty="easy") {
     .then(response => response.json())
     .then(data => {
         startWord = data.startWord;
+        console.log("startWord: " + startWord)
         endWord = data.endWord;
+        console.log("endWord: " + endWord)
 
         // Populate starting and ending word squares
         populateWordSquares("start-letter-", startWord);
@@ -87,6 +125,10 @@ function updateDifficultyButtonState(difficulty) {
 function populateWordSquares(prefix, word) {
     for (let i = 0; i < word.length; i++) {
         document.getElementById(prefix + (i + 1)).textContent = word[i];
+        // add definition to letter-boxes
+        let letterBox = document.getElementById(prefix + (i + 1));
+        letterBox.setAttribute("data-word", word);
+        addHoverToWord(letterBox);
     }
 }
 
@@ -99,7 +141,9 @@ function addGuessToHistory(guess) {
         let letterBox = document.createElement("div");
         letterBox.className = "letter-box";
         letterBox.textContent = guess[i];
+        letterBox.setAttribute("data-word", guess);
         newRow.appendChild(letterBox);
+        addHoverToWord(letterBox);
     }
 
     // Insert the new history row just above the input word row
@@ -155,6 +199,9 @@ function submitWord() {
     .then(response => response.json())
     .then(data => {
         if (data.valid) {
+            // Save game state
+            // saveGameState();
+
             // Hide any previous error message
             errorMessage.style.display = "none";
 
@@ -313,6 +360,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById("helperModal");
     const btn = document.getElementById("rules-btn");
     const closeBtn = document.getElementsByClassName("close-button")[0];
+    loadWordDefinitions();
+
+    // Set infinite mode to blue
+    document.getElementById("infinite").style.backgroundColor = "#007BFF";
+
+    // loadGameState(currentDifficulty);
 
     // When the user clicks on the button, open the modal
     btn.onclick = function() {
@@ -329,6 +382,35 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.target == modal) {
             modal.style.display = "none";
         }
+    }
+
+    // console log to check if the script is loaded
+    console.log("script.js loaded");
+});
+
+document.getElementById("easy").addEventListener("click", function() {
+    if (1 === 1) {
+        currentDifficulty = "easy";
+        updateDifficultyButtonState(currentDifficulty);
+        initializeGame(currentDifficulty);  // Start the game for medium difficulty
+    } else {
+        /* Show error message for 3 seconds and then delete*/
+        let errorMessage = document.getElementById("difficulty-error-message");
+        errorMessage.style.display = "block";
+        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
+        setTimeout(() => {
+            let fadeEffect = setInterval(function () {
+                if (!errorMessage.style.opacity) {
+                    errorMessage.style.opacity = "1";
+                }
+                if (errorMessage.style.opacity > "0") {
+                    errorMessage.style.opacity -= "0.05";
+                } else {
+                    clearInterval(fadeEffect);
+                    errorMessage.style.display = "none";
+                }
+            }, 50);
+        }, 3000);
     }
 });
 
@@ -385,6 +467,31 @@ document.getElementById("hard").addEventListener("click", function() {
     }
 });
 
+document.getElementById("infinite").addEventListener("click", function() {
+    if (1 === 1) {
+        currentDifficulty = "infinite";
+        initializeGame("infinite");  // Start the game for hard difficulty
+    } else {
+        /* Show error message for 3 seconds and then delete*/
+        let errorMessage = document.getElementById("difficulty-error-message");
+        errorMessage.style.display = "block";
+        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
+        setTimeout(() => {
+            let fadeEffect = setInterval(function () {
+                if (!errorMessage.style.opacity) {
+                    errorMessage.style.opacity = "1";
+                }
+                if (errorMessage.style.opacity > "0") {
+                    errorMessage.style.opacity -= "0.05";
+                } else {
+                    clearInterval(fadeEffect);
+                    errorMessage.style.display = "none";
+                }
+            }, 50);
+        }, 3000);
+    }
+});
+
 // Function to copy score to clipboard
 function copyScoreToClipboard() {
     const scoreValue = document.getElementById("share-score-value").textContent;
@@ -402,3 +509,27 @@ function copyScoreToClipboard() {
 
 // Event listener for the "Copy Score to Clipboard" button
 document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);
+
+function saveGameState() {
+    let gameState = {
+        gameBoardHTML: document.getElementById("game-board").innerHTML,
+        score: score,
+        // Add other game state variables here if needed
+    };
+
+    localStorage.setItem(`wordwaysGameState_${currentDifficulty}`, JSON.stringify(gameState));
+}
+
+function loadGameState(difficulty) {
+    let savedState = localStorage.getItem(`wordwaysGameState_${difficulty}`);
+
+    if (savedState) {
+        let gameState = JSON.parse(savedState);
+        document.getElementById("game-board").innerHTML = gameState.gameBoardHTML;
+        score = gameState.score;
+        // Load other game state variables here if needed
+
+        // Update the score display
+        document.getElementById("score").textContent = score;
+    }
+}
