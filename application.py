@@ -2,7 +2,10 @@ from flask import Flask, render_template, request, jsonify, session
 import random
 from script import load_graph, load_words
 from collections import deque
-import json 
+import json
+import time
+
+start_time = time.time()
 
 IS_DAILY = True
 
@@ -26,6 +29,10 @@ def initialize_game():
     if IS_DAILY and difficulty != 'infinite':
         # Use the current date as a seed
         seed = int(user_date.replace('-', ''))  # Convert YYYY-MM-DD to YYYYMMDD
+        random.seed(seed)
+    elif difficulty == 'infinite':
+        # Use the current time as a seed including seconds
+        seed = int(time.time())
         random.seed(seed)
 
     while True:
@@ -80,6 +87,8 @@ def play_move():
     # Update the backend's score to match the frontend's score
     if frontend_score < score:
         score = frontend_score
+
+    print('Trying move:', move, 'with last word:', current_word)
 
     # Check if the move is valid
     if move in graph[current_word]:
@@ -141,6 +150,23 @@ def get_shortest_paths():
 def give_up():
     # Logic same as above
     return get_shortest_paths()
+
+@application.route('/load-game-state', methods=['POST'])
+def load_game_state():
+    data = request.get_json()
+    difficulty = data.get('difficulty')
+    score = data.get('score')
+    wordHistory = data.get('historyRows')
+    print(wordHistory)
+    if not wordHistory:
+        wordHistory = []
+
+    session['current_word'] = wordHistory[-1] if wordHistory else session['start_word']
+    session['difficulty'] = difficulty
+    session['score'] = score
+    session['word_history'] = wordHistory
+
+    return jsonify({'status': 'success'})
 
 ##### Helper functions #####
 

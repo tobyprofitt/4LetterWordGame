@@ -309,12 +309,24 @@ button:hover {
     position: absolute;
     z-index: 2;
     top: 10px;
-    left: 200%;
+    left: 105%;
 
     /* Set your desired font size here */
-    font-size: 11px; /* Adjust this as needed */
+    font-size: 14px; /* Adjust this as needed */
 }
 
 .tooltip:hover .tooltiptext {
     display: block;
+}
+
+/* Media query for mobile devices */
+@media screen and (max-width: 600px) {
+    .tooltip .tooltiptext {
+        position: fixed; /* Fixed position relative to the viewport */
+        top: 20%; /* Center vertically */
+        left: 50%; /* Center horizontally */
+        transform: translate(-50%, -50%); /* Adjust for perfect centering */
+        width: 90%; /* Set a suitable width */
+        max-width: none; /* Override any max-width set previously */
+    }
 }

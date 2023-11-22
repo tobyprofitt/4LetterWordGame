@@ -1,13 +1,45 @@
 let startWord = "";  // Filled by the server
 let endWord = "";    // Filled by the server
-let currentDifficulty = "easy"; // or initialize with a default value if necessary
-let medium_available = false;
-let hard_available = false;
+let currentDifficulty = "easy";
 let easy_score = 0;
 let medium_score = 0;
 let hard_score = 0;
-let currentDate = new Date().toISOString().slice(0,10); // YYYY-MM-DD format
+var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
 let wordDefinitions = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    clearAllStates();
+
+    // Get the modal and its elements
+    const modal = document.getElementById("helperModal");
+    const btn = document.getElementById("rules-btn");
+    const closeBtn = document.getElementsByClassName("close-button")[0];
+    loadWordDefinitions();
+
+    // Set infinite mode to blue
+    document.getElementById("infinite").style.backgroundColor = "#007BFF";
+
+    // When the user clicks on the button, open the modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // console log to check if the script is loaded
+    console.log("script.js loaded");
+});
 
 document.getElementById("user-input").addEventListener("keyup", function(event) {
     if (event.key === "Enter") {
@@ -76,12 +108,9 @@ function clearBoard() {
 }
 
 function initializeGame(difficulty="easy") {
-    if (difficulty === "easy") {
-        medium_available = false;
-        hard_available = false;
-    } else if (difficulty === "medium") {
-        hard_available = false;
-    }
+    document.getElementById("undo-btn").disabled = false;
+    document.getElementById("submit-btn").disabled = false;
+    currentDifficulty = difficulty;
     console.log("initializeGame called");
     clearBoard();
     fetch(`/initialize-game?difficulty=${difficulty}&date=${currentDate}`)
@@ -95,30 +124,16 @@ function initializeGame(difficulty="easy") {
         // Populate starting and ending word squares
         populateWordSquares("start-letter-", startWord);
         populateWordSquares("end-letter-", endWord);
+        loadGameState(difficulty);
     });
     console.log("initializeGame finished");
 }
 
-// Function to reset all difficulty button states to default
-function resetDifficultyButtons() {
-    document.getElementById("easy").classList.remove("active", "completed");
-    document.getElementById("medium").classList.remove("active", "completed");
-    document.getElementById("hard").classList.remove("active", "completed");
-}
-
-// Function to update the button state based on the current difficulty
-function updateDifficultyButtonState(difficulty) {
-    resetDifficultyButtons();
-    
-    if (difficulty === "easy") {
-        document.getElementById("easy").classList.add("active");
-    } else if (difficulty === "medium") {
-        document.getElementById("easy").classList.add("completed");
-        document.getElementById("medium").classList.add("active");
-    } else if (difficulty === "hard") {
-        document.getElementById("easy").classList.add("completed");
-        document.getElementById("medium").classList.add("completed");
-        document.getElementById("hard").classList.add("active");
+// Function to update the button state of the difficulty level
+function updateDifficultyButtonState(difficulty, completion) {    
+    if (completion === true) {
+        console.log("updateDifficultyButtonState called for " + difficulty + " with completion = true");
+        document.getElementById(difficulty).classList.add("completed");
     }
 }
 
@@ -148,6 +163,9 @@ function addGuessToHistory(guess) {
 
     // Insert the new history row just above the input word row
     gameBoard.insertBefore(newRow, document.getElementById("input-word-row"));
+
+    // Save gamestate
+    saveGameState();
 }
 
 function undoLastMove() {
@@ -199,8 +217,13 @@ function submitWord() {
     .then(response => response.json())
     .then(data => {
         if (data.valid) {
+            // Increment the score
+            document.getElementById("score").textContent = data.score;
+            currentScore = data.score;
+            console.log("currentScore: " + currentScore);
+
             // Save game state
-            // saveGameState();
+            saveGameState();
 
             // Hide any previous error message
             errorMessage.style.display = "none";
@@ -223,26 +246,28 @@ function submitWord() {
 
             // Prevent adding another set of 4 boxes
             document.getElementById("user-input").disabled = true;
+            document.getElementById("undo-btn").disabled = true;
+            document.getElementById("submit-btn").disabled = true;
+
 
             // Enable the next difficulty
             if (currentDifficulty === "easy") {
                 easy_score = currentScore+1;
-                updateDifficultyButtonState("medium");
+                updateDifficultyButtonState("easy", true);
                 document.getElementById("medium").classList.add("active");
-                medium_available = true
             } else if (currentDifficulty === "medium") {
                 medium_score = currentScore+1;
-                updateDifficultyButtonState("hard");
+                updateDifficultyButtonState("medium", true);
                 document.getElementById("hard").classList.add("active");
-                hard_available = true
             } else if (currentDifficulty === "hard") {
                 hard_score = currentScore+1;
+                updateDifficultyButtonState("hard", true);
                 // Display share section
                 document.getElementById("share-score").style.display = "block";
                 document.getElementById("share-score-value").textContent = currentScore+1;  // Assuming currentScore holds the current score
             }
 
-            // Handle user clicks on difficulty levels (from Step 2.3)
+            // Handle user clicks on difficulty levels
             const difficulties = document.querySelectorAll(".difficulty");
 
             difficulties.forEach(difficulty => {
@@ -257,12 +282,6 @@ function submitWord() {
                     }
                 });
             });
-
-            // Display a restart prompt below the game board
-            //let restartPrompt = document.createElement("div");
-            //restartPrompt.id = "restart-prompt";
-            //restartPrompt.innerHTML = '<p>Congratulations! Would you like to play again?</p><button onclick="restartGame()">Restart</button>';
-            //document.body.appendChild(restartPrompt);
         }
 
         } else {
@@ -295,11 +314,6 @@ function submitWord() {
             }, 3000);
         }
     });
-}
-
-function restartGame() {
-    // Refresh the page to restart the game
-    location.reload();
 }
 
 function displayShortestPaths(data) {
@@ -355,142 +369,31 @@ document.getElementById("give-up-btn").addEventListener("click", function() {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Get the modal and its elements
-    const modal = document.getElementById("helperModal");
-    const btn = document.getElementById("rules-btn");
-    const closeBtn = document.getElementsByClassName("close-button")[0];
-    loadWordDefinitions();
-
-    // Set infinite mode to blue
-    document.getElementById("infinite").style.backgroundColor = "#007BFF";
-
-    // loadGameState(currentDifficulty);
-
-    // When the user clicks on the button, open the modal
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    // When the user clicks on <span> (x), close the modal
-    closeBtn.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    // console log to check if the script is loaded
-    console.log("script.js loaded");
-});
-
+// Button listeners
 document.getElementById("easy").addEventListener("click", function() {
-    if (1 === 1) {
-        currentDifficulty = "easy";
-        updateDifficultyButtonState(currentDifficulty);
-        initializeGame(currentDifficulty);  // Start the game for medium difficulty
-    } else {
-        /* Show error message for 3 seconds and then delete*/
-        let errorMessage = document.getElementById("difficulty-error-message");
-        errorMessage.style.display = "block";
-        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
-        setTimeout(() => {
-            let fadeEffect = setInterval(function () {
-                if (!errorMessage.style.opacity) {
-                    errorMessage.style.opacity = "1";
-                }
-                if (errorMessage.style.opacity > "0") {
-                    errorMessage.style.opacity -= "0.05";
-                } else {
-                    clearInterval(fadeEffect);
-                    errorMessage.style.display = "none";
-                }
-            }, 50);
-        }, 3000);
-    }
-});
-
+    document.getElementById("easy").disabled = true;
+    saveGameState();
+    currentDifficulty = "easy";
+    updateDifficultyButtonState(currentDifficulty);
+    initializeGame(currentDifficulty);
+    document.getElementById("easy").disabled = false;});
 document.getElementById("medium").addEventListener("click", function() {
-    if (medium_available) {
-        currentDifficulty = "medium";
-        updateDifficultyButtonState(currentDifficulty);
-        initializeGame(currentDifficulty);  // Start the game for medium difficulty
-    } else {
-        /* Show error message for 3 seconds and then delete*/
-        let errorMessage = document.getElementById("difficulty-error-message");
-        errorMessage.style.display = "block";
-        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
-        setTimeout(() => {
-            let fadeEffect = setInterval(function () {
-                if (!errorMessage.style.opacity) {
-                    errorMessage.style.opacity = "1";
-                }
-                if (errorMessage.style.opacity > "0") {
-                    errorMessage.style.opacity -= "0.05";
-                } else {
-                    clearInterval(fadeEffect);
-                    errorMessage.style.display = "none";
-                }
-            }, 50);
-        }, 3000);
-    }
-});
-
+    document.getElementById("medium").disabled = true;
+    saveGameState();
+    currentDifficulty = "medium";
+    updateDifficultyButtonState(currentDifficulty);
+    initializeGame(currentDifficulty);  
+    document.getElementById("medium").disabled = false;});
 document.getElementById("hard").addEventListener("click", function() {
-    if (hard_available) {
-        currentDifficulty = "hard";
-        medium_available = false;
-        updateDifficultyButtonState(currentDifficulty);
-        initializeGame(currentDifficulty);  // Start the game for hard difficulty
-    } else {
-        /* Show error message for 3 seconds and then delete*/
-        let errorMessage = document.getElementById("difficulty-error-message");
-        errorMessage.style.display = "block";
-        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
-        setTimeout(() => {
-            let fadeEffect = setInterval(function () {
-                if (!errorMessage.style.opacity) {
-                    errorMessage.style.opacity = "1";
-                }
-                if (errorMessage.style.opacity > "0") {
-                    errorMessage.style.opacity -= "0.05";
-                } else {
-                    clearInterval(fadeEffect);
-                    errorMessage.style.display = "none";
-                }
-            }, 50);
-        }, 3000);
-    }
-});
-
+    document.getElementById("hard").disabled = true;
+    saveGameState();
+    currentDifficulty = "hard";
+    updateDifficultyButtonState(currentDifficulty);
+    initializeGame(currentDifficulty); 
+    document.getElementById("hard").disabled = false;});
 document.getElementById("infinite").addEventListener("click", function() {
-    if (1 === 1) {
-        currentDifficulty = "infinite";
-        initializeGame("infinite");  // Start the game for hard difficulty
-    } else {
-        /* Show error message for 3 seconds and then delete*/
-        let errorMessage = document.getElementById("difficulty-error-message");
-        errorMessage.style.display = "block";
-        errorMessage.style.opacity = "1";  // Reset opacity to fully visible
-        setTimeout(() => {
-            let fadeEffect = setInterval(function () {
-                if (!errorMessage.style.opacity) {
-                    errorMessage.style.opacity = "1";
-                }
-                if (errorMessage.style.opacity > "0") {
-                    errorMessage.style.opacity -= "0.05";
-                } else {
-                    clearInterval(fadeEffect);
-                    errorMessage.style.display = "none";
-                }
-            }, 50);
-        }, 3000);
-    }
-});
+    currentDifficulty = "infinite";
+    initializeGame("infinite"); });
 
 // Function to copy score to clipboard
 function copyScoreToClipboard() {
@@ -506,30 +409,123 @@ function copyScoreToClipboard() {
         document.getElementById("copy-success").style.display = "none";
     }, 2000);
 }
-
-// Event listener for the "Copy Score to Clipboard" button
 document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);
 
 function saveGameState() {
+    // Saves the guessed words and the current score to localStorage
+    console.log("saveGameState called");
+    let currentScore = parseInt(document.getElementById("score").textContent);
+    let gameBoardHTML = document.getElementById("game-board").innerHTML;
+    let gameBoard = document.getElementById("game-board");
+    let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
+    let guessedWords = []
+    for (let row of historyRows) {
+        // add data-word of each row to guessedWords
+        guessedWords.push(row.querySelector(".letter-box").getAttribute("data-word"));
+    }
+
+    if (!guessedWords || guessedWords.length === 0) {
+        return;
+    }
+
+    let lastWord = guessedWords[guessedWords.length - 1];
     let gameState = {
         gameBoardHTML: document.getElementById("game-board").innerHTML,
-        score: score,
-        // Add other game state variables here if needed
+        score: currentScore,
+        historyRows: guessedWords,
+        lastWord: lastWord
     };
 
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+    let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
+
     localStorage.setItem(`wordwaysGameState_${currentDifficulty}`, JSON.stringify(gameState));
+    localStorage.setItem(`lastPlayedDate_${currentDifficulty}`, currentDate);
+
+    console.log("Saved state: ", gameState);
+    console.log("Saved on: ", currentDate);
 }
 
 function loadGameState(difficulty) {
     let savedState = localStorage.getItem(`wordwaysGameState_${difficulty}`);
+    let lastPlayedDate = localStorage.getItem(`lastPlayedDate_${difficulty}`);
+    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+    let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
 
-    if (savedState) {
+    console.log("loadGameState called for difficulty:", difficulty);
+    console.log("Saved State: ", savedState);
+    console.log("Last Played Date: ", lastPlayedDate, "Current Date: ", currentDate);
+
+    if ((savedState && lastPlayedDate === currentDate) && (difficulty != "infinite")) {
         let gameState = JSON.parse(savedState);
         document.getElementById("game-board").innerHTML = gameState.gameBoardHTML;
         score = gameState.score;
-        // Load other game state variables here if needed
-
-        // Update the score display
         document.getElementById("score").textContent = score;
+
+        // search for last guessed word in HTML
+        let gameBoard = document.getElementById("game-board");
+        let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
+        let guessedWords = []
+        for (let row of historyRows) {
+            // add data-word of each row to guessedWords
+            guessedWords.push(row.querySelector(".letter-box").getAttribute("data-word"));
+            // add hover to each letter-box for guessed words
+            let letterBox = row.querySelector(".letter-box");
+            addHoverToWord(letterBox);
+        }
+
+        // add hover to each letter-box for start and target words
+        let startWordLetterBoxes = document.querySelectorAll("#start-word-row .letter-box");
+        for (let letterBox of startWordLetterBoxes) {
+            addHoverToWord(letterBox);
+        }
+        let endWordLetterBoxes = document.querySelectorAll("#end-word-row .letter-box");
+        for (let letterBox of endWordLetterBoxes) {
+            addHoverToWord(letterBox);
+        }
+    
+        // Check if words were guessed
+        if (historyRows.length > 0) {
+            let lastGuessedWord = historyRows[historyRows.length - 1].querySelector(".letter-box").getAttribute("data-word");
+            console.log("Last word:", lastGuessedWord, "\nEnd word:", endWord);
+
+            // If lastword = target word add win affect and disable undo/submit
+            if (lastGuessedWord === endWord) {
+                let gameBoard = document.getElementById("game-board");
+                gameBoard.classList.add("win-effect");
+                document.getElementById("user-input").disabled = true;
+                document.getElementById("undo-btn").disabled = true;
+                document.getElementById("submit-btn").disabled = true;
+
+                // Update button colours !!BUG
+                updateDifficultyButtonState(difficulty, true);
+            }
+        }
+
+        // Send the loaded state to the backend
+        fetch(`/load-game-state`, {
+            method: 'POST',
+            body: JSON.stringify({
+                'difficulty': difficulty,
+                'score': gameState.score,
+                'historyRows': guessedWords,
+                'lastWord': gameState.lastWord
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+
+        console.log("Game state loaded");
+    } else {
+        console.log("No saved game state for today, or state is outdated.");
+        localStorage.removeItem(`wordwaysGameState_${difficulty}`);
+        localStorage.removeItem(`lastPlayedDate_${difficulty}`);
     }
+}
+
+function clearAllStates(){ 
+    console.log("clearAllStates called");
+    localStorage.clear(); 
 }
