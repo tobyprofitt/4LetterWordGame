@@ -1,15 +1,17 @@
 let startWord = "";  // Filled by the server
 let endWord = "";    // Filled by the server
 let currentDifficulty = "easy";
-let easy_score = 0;
-let medium_score = 0;
-let hard_score = 0;
+let scores = {
+    easy: 0,
+    medium: 0,
+    hard: 0
+};
 var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
 let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
 let wordDefinitions = {};
 
 document.addEventListener('DOMContentLoaded', function() {
-    clearAllStates();
+    //clearAllStates();
 
     // Get the modal and its elements
     const modal = document.getElementById("helperModal");
@@ -59,7 +61,6 @@ function loadWordDefinitions() {
 }
 
 function addHoverToWord(wordElement) {
-    console.log("addHoverToWord called");
     wordElement.addEventListener('mouseenter', function() {
         const word = wordElement.getAttribute('data-word');
         const definitions = wordDefinitions[word];
@@ -125,11 +126,10 @@ function initializeGame(difficulty="easy") {
         populateWordSquares("start-letter-", startWord);
         populateWordSquares("end-letter-", endWord);
         loadGameState(difficulty);
+        console.log("initializeGame finished");
     });
-    console.log("initializeGame finished");
 }
 
-// Function to update the button state of the difficulty level
 function updateDifficultyButtonState(difficulty, completion) {    
     if (completion === true) {
         console.log("updateDifficultyButtonState called for " + difficulty + " with completion = true");
@@ -223,7 +223,7 @@ function submitWord() {
             console.log("currentScore: " + currentScore);
 
             // Save game state
-            saveGameState();
+            // saveGameState();
 
             // Hide any previous error message
             errorMessage.style.display = "none";
@@ -252,19 +252,19 @@ function submitWord() {
 
             // Enable the next difficulty
             if (currentDifficulty === "easy") {
-                easy_score = currentScore+1;
+                scores.easy = currentScore+1;
                 updateDifficultyButtonState("easy", true);
                 document.getElementById("medium").classList.add("active");
             } else if (currentDifficulty === "medium") {
-                medium_score = currentScore+1;
+                scores.medium = currentScore+1;
                 updateDifficultyButtonState("medium", true);
                 document.getElementById("hard").classList.add("active");
             } else if (currentDifficulty === "hard") {
-                hard_score = currentScore+1;
+                scores.hard = currentScore+1;
                 updateDifficultyButtonState("hard", true);
                 // Display share section
                 document.getElementById("share-score").style.display = "block";
-                document.getElementById("share-score-value").textContent = currentScore+1;  // Assuming currentScore holds the current score
+                document.getElementById("share-score-value").textContent = currentScore;  // Assuming currentScore holds the current score
             }
 
             // Handle user clicks on difficulty levels
@@ -282,6 +282,7 @@ function submitWord() {
                     }
                 });
             });
+            saveGameState()
         }
 
         } else {
@@ -397,9 +398,12 @@ document.getElementById("infinite").addEventListener("click", function() {
 
 // Function to copy score to clipboard
 function copyScoreToClipboard() {
+    const easyScore = scores.easy || 0; 
+    const mediumScore = scores.medium || 0;
+    const hardScore = scores.hard || 0;
     const scoreValue = document.getElementById("share-score-value").textContent;
     const textArea = document.createElement("textarea");
-    textArea.value = `I scored ${easy_score}, ${medium_score} and ${hard_score} on WordWays! Try and beat my score at wordwaysgame.com`;
+    textArea.value = `I scored ${easyScore}, ${mediumScore} and ${hardScore} on WordWays! Try and beat my score at wordwaysgame.com`;
     document.body.appendChild(textArea);
     textArea.select();
     document.execCommand('copy');
@@ -412,13 +416,26 @@ function copyScoreToClipboard() {
 document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);
 
 function saveGameState() {
-    // Saves the guessed words and the current score to localStorage
     console.log("saveGameState called");
+
+    // Hide all definition elements before saving
+    const definitionElements = document.querySelectorAll('.tooltip');
+    definitionElements.forEach(element => {
+        element.style.display = 'none';
+    });
+    
     let currentScore = parseInt(document.getElementById("score").textContent);
     let gameBoardHTML = document.getElementById("game-board").innerHTML;
     let gameBoard = document.getElementById("game-board");
     let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
     let guessedWords = []
+    let difficultyButtonStates = {
+        easy: document.getElementById('easy').classList.value,
+        medium: document.getElementById('medium').classList.value,
+        hard: document.getElementById('hard').classList.value
+        // Add other difficulty levels if you have more
+    };
+
     for (let row of historyRows) {
         // add data-word of each row to guessedWords
         guessedWords.push(row.querySelector(".letter-box").getAttribute("data-word"));
@@ -439,8 +456,21 @@ function saveGameState() {
     var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
     let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
 
+    // Update scores variable for current difficulty
+    if (currentDifficulty === "easy") {
+        scores.easy = currentScore;
+    } else if (currentDifficulty === "medium") {
+        scores.medium = currentScore;
+    } else if (currentDifficulty === "hard") {
+        scores.hard = currentScore;
+    }
+
+    console.log("Scores: ", scores);
+
+    localStorage.setItem(`scores`, JSON.stringify(scores));
     localStorage.setItem(`wordwaysGameState_${currentDifficulty}`, JSON.stringify(gameState));
     localStorage.setItem(`lastPlayedDate_${currentDifficulty}`, currentDate);
+    localStorage.setItem(`difficultyButtonStates`, JSON.stringify(difficultyButtonStates))
 
     console.log("Saved state: ", gameState);
     console.log("Saved on: ", currentDate);
@@ -451,9 +481,18 @@ function loadGameState(difficulty) {
     let lastPlayedDate = localStorage.getItem(`lastPlayedDate_${difficulty}`);
     var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
     let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
+    let savedButtonStates = localStorage.getItem(`difficultyButtonStates`);
+    scores = JSON.parse(localStorage.getItem(`scores`));
+    if (!scores) {
+        scores = {
+            easy: 0,
+            medium: 0,
+            hard: 0
+        }
+    }
+    console.log('Loaded scores: ', scores)
 
     console.log("loadGameState called for difficulty:", difficulty);
-    console.log("Saved State: ", savedState);
     console.log("Last Played Date: ", lastPlayedDate, "Current Date: ", currentDate);
 
     if ((savedState && lastPlayedDate === currentDate) && (difficulty != "infinite")) {
@@ -487,7 +526,6 @@ function loadGameState(difficulty) {
         // Check if words were guessed
         if (historyRows.length > 0) {
             let lastGuessedWord = historyRows[historyRows.length - 1].querySelector(".letter-box").getAttribute("data-word");
-            console.log("Last word:", lastGuessedWord, "\nEnd word:", endWord);
 
             // If lastword = target word add win affect and disable undo/submit
             if (lastGuessedWord === endWord) {
@@ -500,6 +538,23 @@ function loadGameState(difficulty) {
                 // Update button colours !!BUG
                 updateDifficultyButtonState(difficulty, true);
             }
+
+            // if Hard mode is finished, add share score section
+            if (difficulty === "hard" && lastGuessedWord === endWord) {
+                document.getElementById("share-score").style.display = "block";
+                document.getElementById("share-score-value").textContent = scores.hard;
+            }
+        }
+        
+        if (savedButtonStates) {
+            let buttonStates = JSON.parse(savedButtonStates);
+
+            // Apply saved class lists to each button
+            Object.keys(buttonStates).forEach(difficulty => {
+                const button = document.getElementById(difficulty);
+                button.className = ''; // Clear existing classes
+                button.classList.value = buttonStates[difficulty];
+            });
         }
 
         // Send the loaded state to the backend
