@@ -4,13 +4,14 @@ from script import load_graph, load_words
 from collections import deque
 import json
 import time
+import os
 
 start_time = time.time()
 
 IS_DAILY = True
 
 application = Flask(__name__)
-application.secret_key = 'secret_key1'
+application.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev_key_for_testing')
 
 words = load_words('wordsdetail2.txt')
 graph = load_graph('wordsdetail_graph.pkl')
