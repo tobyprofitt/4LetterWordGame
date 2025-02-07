@@ -1,16 +1,16 @@
-let startWord = "";  // Filled by the server
-let endWord = "";    // Filled by the server
+let startWord = ""; // Filled by the server
+let endWord = ""; // Filled by the server
 let currentDifficulty = "easy";
 let scores = {
     easy: 0,
     medium: 0,
-    hard: 0
+    hard: 0,
 };
-var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
-let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
+var tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+let currentDate = new Date(Date.now() - tzoffset).toISOString().slice(0, 10); // YYYY-MM-DD format
 let wordDefinitions = {};
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
     //clearAllStates();
 
     // Get the modal and its elements
@@ -23,61 +23,68 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("infinite").style.backgroundColor = "#007BFF";
 
     // When the user clicks on the button, open the modal
-    btn.onclick = function() {
+    btn.onclick = function () {
         modal.style.display = "block";
-    }
+    };
 
     // When the user clicks on <span> (x), close the modal
-    closeBtn.onclick = function() {
+    closeBtn.onclick = function () {
         modal.style.display = "none";
-    }
+    };
 
     // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         if (event.target == modal) {
             modal.style.display = "none";
         }
-    }
+    };
 
     // console log to check if the script is loaded
     console.log("script.js loaded");
 });
 
-document.getElementById("user-input").addEventListener("keyup", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        submitWord();
-    }
-});
+document
+    .getElementById("user-input")
+    .addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            submitWord();
+        }
+    });
 
 function loadWordDefinitions() {
     // Path to your word_definitions.json file
-    fetch('static/word_definitions.json')
-    .then(response => response.json())
-    .then(data => {
-        wordDefinitions = data;
-    })
-    .catch(error => console.error('Error loading word definitions:', error));
+    fetch("static/word_definitions.json")
+        .then((response) => response.json())
+        .then((data) => {
+            wordDefinitions = data;
+        })
+        .catch((error) =>
+            console.error("Error loading word definitions:", error)
+        );
 }
 
 function addHoverToWord(wordElement) {
-    wordElement.addEventListener('mouseenter', function() {
-        const word = wordElement.getAttribute('data-word');
+    wordElement.addEventListener("mouseenter", function () {
+        const word = wordElement.getAttribute("data-word");
         const definitions = wordDefinitions[word];
-        const definitionText = definitions && definitions.length > 0 ? definitions[0] : 'Definition not available.';
+        const definitionText =
+            definitions && definitions.length > 0
+                ? definitions[0]
+                : "Definition not available.";
 
-        const tooltipText = document.createElement('span');
-        tooltipText.className = 'tooltiptext';
+        const tooltipText = document.createElement("span");
+        tooltipText.className = "tooltiptext";
         tooltipText.textContent = definitionText;
 
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip';
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
         wordElement.appendChild(tooltip);
         tooltip.appendChild(tooltipText);
     });
 
-    wordElement.addEventListener('mouseleave', function() {
-        const tooltip = wordElement.querySelector('.tooltip');
+    wordElement.addEventListener("mouseleave", function () {
+        const tooltip = wordElement.querySelector(".tooltip");
         if (tooltip) {
             wordElement.removeChild(tooltip);
         }
@@ -90,7 +97,9 @@ function clearBoard() {
         document.getElementById("end-letter-" + i).textContent = "";
     }
     let gameBoard = document.getElementById("game-board");
-    let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
+    let historyRows = gameBoard.querySelectorAll(
+        ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
+    );
     for (let row of historyRows) {
         gameBoard.removeChild(row);
     }
@@ -108,31 +117,35 @@ function clearBoard() {
     document.getElementById("share-score").style.display = "none";
 }
 
-function initializeGame(difficulty="easy") {
+function initializeGame(difficulty = "easy") {
     document.getElementById("undo-btn").disabled = false;
     document.getElementById("submit-btn").disabled = false;
     currentDifficulty = difficulty;
     console.log("initializeGame called");
     clearBoard();
     fetch(`/initialize-game?difficulty=${difficulty}&date=${currentDate}`)
-    .then(response => response.json())
-    .then(data => {
-        startWord = data.startWord;
-        console.log("startWord: " + startWord)
-        endWord = data.endWord;
-        console.log("endWord: " + endWord)
+        .then((response) => response.json())
+        .then((data) => {
+            startWord = data.startWord;
+            console.log("startWord: " + startWord);
+            endWord = data.endWord;
+            console.log("endWord: " + endWord);
 
-        // Populate starting and ending word squares
-        populateWordSquares("start-letter-", startWord);
-        populateWordSquares("end-letter-", endWord);
-        loadGameState(difficulty);
-        console.log("initializeGame finished");
-    });
+            // Populate starting and ending word squares
+            populateWordSquares("start-letter-", startWord);
+            populateWordSquares("end-letter-", endWord);
+            loadGameState(difficulty);
+            console.log("initializeGame finished");
+        });
 }
 
-function updateDifficultyButtonState(difficulty, completion) {    
+function updateDifficultyButtonState(difficulty, completion) {
     if (completion === true) {
-        console.log("updateDifficultyButtonState called for " + difficulty + " with completion = true");
+        console.log(
+            "updateDifficultyButtonState called for " +
+                difficulty +
+                " with completion = true"
+        );
         document.getElementById(difficulty).classList.add("completed");
     }
 }
@@ -170,9 +183,11 @@ function addGuessToHistory(guess) {
 
 function undoLastMove() {
     let gameBoard = document.getElementById("game-board");
-    let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
+    let historyRows = gameBoard.querySelectorAll(
+        ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
+    );
     let lastHistoryRow = historyRows[historyRows.length - 1];
-    
+
     // Only allow undo if there's any history
     if (lastHistoryRow) {
         // Remove the last history row
@@ -184,15 +199,17 @@ function undoLastMove() {
         }
 
         // Decrement the score
-        let currentScore = parseInt(document.getElementById("score").textContent);
+        let currentScore = parseInt(
+            document.getElementById("score").textContent
+        );
         document.getElementById("score").textContent = currentScore - 1;
 
         // Send an "Undo" request to the backend
-        fetch('/undo-move', {
-            method: 'POST',
+        fetch("/undo-move", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json'
-            }
+                "Content-Type": "application/json",
+            },
         });
     }
 }
@@ -204,123 +221,128 @@ function submitWord() {
     let inputWordRow = document.getElementById("input-word-row");
 
     // Send the userInput and currentScore to the server for validation
-    fetch('/play-move', {
-        method: 'POST',
+    fetch("/play-move", {
+        method: "POST",
         body: JSON.stringify({
-            'move': userInput,
-            'score': currentScore
+            move: userInput,
+            score: currentScore,
         }),
         headers: {
-            'Content-Type': 'application/json'
-        }
+            "Content-Type": "application/json",
+        },
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.valid) {
-            // Increment the score
-            document.getElementById("score").textContent = data.score;
-            currentScore = data.score;
-            console.log("currentScore: " + currentScore);
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.valid) {
+                // Increment the score
+                document.getElementById("score").textContent = data.score;
+                currentScore = data.score;
+                console.log("currentScore: " + currentScore);
 
-            // Save game state
-            // saveGameState();
+                // Save game state
+                // saveGameState();
 
-            // Hide any previous error message
-            errorMessage.style.display = "none";
+                // Hide any previous error message
+                errorMessage.style.display = "none";
 
-            // Add the userInput to the history
-            addGuessToHistory(userInput);
+                // Add the userInput to the history
+                addGuessToHistory(userInput);
 
-            // Clear the input squares for the next guess
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById("input-letter-" + i).textContent = "";
+                // Clear the input squares for the next guess
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById("input-letter-" + i).textContent =
+                        "";
+                }
+
+                document.getElementById("score").textContent = data.score;
+                document.getElementById("user-input").value = ""; // Clear the input
+
+                // Check if user reached the target word
+                if (userInput === endWord) {
+                    let gameBoard = document.getElementById("game-board");
+                    gameBoard.classList.add("win-effect");
+
+                    // Prevent adding another set of 4 boxes
+                    document.getElementById("user-input").disabled = true;
+                    document.getElementById("undo-btn").disabled = true;
+                    document.getElementById("submit-btn").disabled = true;
+
+                    // Enable the next difficulty
+                    if (currentDifficulty === "easy") {
+                        scores.easy = currentScore + 1;
+                        updateDifficultyButtonState("easy", true);
+                        document
+                            .getElementById("medium")
+                            .classList.add("active");
+                    } else if (currentDifficulty === "medium") {
+                        scores.medium = currentScore + 1;
+                        updateDifficultyButtonState("medium", true);
+                        document.getElementById("hard").classList.add("active");
+                    } else if (currentDifficulty === "hard") {
+                        scores.hard = currentScore + 1;
+                        updateDifficultyButtonState("hard", true);
+                        // Display share section
+                        document.getElementById("share-score").style.display =
+                            "block";
+                        document.getElementById(
+                            "share-score-value"
+                        ).textContent = currentScore; // Assuming currentScore holds the current score
+                    }
+
+                    // Handle user clicks on difficulty levels
+                    const difficulties =
+                        document.querySelectorAll(".difficulty");
+
+                    difficulties.forEach((difficulty) => {
+                        difficulty.addEventListener("click", function () {
+                            if (difficulty.classList.contains("active")) {
+                                // Make a request to the backend to update the session's difficulty and get new words
+                                currentDifficulty = difficulty.id; // set the current difficulty
+
+                                // You can now make a request to /initialize-game again to get words for this difficulty
+                                // This will be similar to the request you make when the game starts
+                                // After receiving the response, update the game UI accordingly
+                            }
+                        });
+                    });
+                    saveGameState();
+                }
+            } else {
+                // Display error message
+                errorMessage.textContent = "Invalid move. Try again.";
+                errorMessage.style.display = "block";
+                errorMessage.style.opacity = "1"; // Reset opacity to fully visible
+
+                // Apply shake animation to the input boxes
+                inputWordRow.classList.add("shake");
+
+                // Remove the shake animation after it finishes
+                setTimeout(() => {
+                    inputWordRow.classList.remove("shake");
+                }, 500);
+
+                // Fade out the error message after 3 seconds
+                setTimeout(() => {
+                    let fadeEffect = setInterval(function () {
+                        if (!errorMessage.style.opacity) {
+                            errorMessage.style.opacity = "1";
+                        }
+                        if (errorMessage.style.opacity > "0") {
+                            errorMessage.style.opacity -= "0.05";
+                        } else {
+                            clearInterval(fadeEffect);
+                            errorMessage.style.display = "none";
+                        }
+                    }, 50);
+                }, 3000);
             }
-
-            document.getElementById("score").textContent = data.score;
-            document.getElementById("user-input").value = "";  // Clear the input
-
-        // Check if user reached the target word
-        if (userInput === endWord) {
-            let gameBoard = document.getElementById("game-board");
-            gameBoard.classList.add("win-effect");
-
-            // Prevent adding another set of 4 boxes
-            document.getElementById("user-input").disabled = true;
-            document.getElementById("undo-btn").disabled = true;
-            document.getElementById("submit-btn").disabled = true;
-
-
-            // Enable the next difficulty
-            if (currentDifficulty === "easy") {
-                scores.easy = currentScore+1;
-                updateDifficultyButtonState("easy", true);
-                document.getElementById("medium").classList.add("active");
-            } else if (currentDifficulty === "medium") {
-                scores.medium = currentScore+1;
-                updateDifficultyButtonState("medium", true);
-                document.getElementById("hard").classList.add("active");
-            } else if (currentDifficulty === "hard") {
-                scores.hard = currentScore+1;
-                updateDifficultyButtonState("hard", true);
-                // Display share section
-                document.getElementById("share-score").style.display = "block";
-                document.getElementById("share-score-value").textContent = currentScore;  // Assuming currentScore holds the current score
-            }
-
-            // Handle user clicks on difficulty levels
-            const difficulties = document.querySelectorAll(".difficulty");
-
-            difficulties.forEach(difficulty => {
-                difficulty.addEventListener("click", function() {
-                    if (difficulty.classList.contains("active")) {
-                        // Make a request to the backend to update the session's difficulty and get new words
-                        currentDifficulty = difficulty.id; // set the current difficulty
-
-                        // You can now make a request to /initialize-game again to get words for this difficulty
-                        // This will be similar to the request you make when the game starts
-                        // After receiving the response, update the game UI accordingly
-                    }
-                });
-            });
-            saveGameState()
-        }
-
-        } else {
-            // Display error message
-            errorMessage.textContent = "Invalid move. Try again.";
-            errorMessage.style.display = "block";
-            errorMessage.style.opacity = "1";  // Reset opacity to fully visible
-
-            // Apply shake animation to the input boxes
-            inputWordRow.classList.add("shake");
-
-            // Remove the shake animation after it finishes
-            setTimeout(() => {
-                inputWordRow.classList.remove("shake");
-            }, 500);
-
-            // Fade out the error message after 3 seconds
-            setTimeout(() => {
-                let fadeEffect = setInterval(function () {
-                    if (!errorMessage.style.opacity) {
-                        errorMessage.style.opacity = "1";
-                    }
-                    if (errorMessage.style.opacity > "0") {
-                        errorMessage.style.opacity -= "0.05";
-                    } else {
-                        clearInterval(fadeEffect);
-                        errorMessage.style.display = "none";
-                    }
-                }, 50);
-            }, 3000);
-        }
-    });
+        });
 }
 
 function displayShortestPaths(data) {
     let pathsList = document.getElementById("paths-list");
     let optimalScore = document.getElementById("optimal-score");
-    
+
     // Clear any previous paths
     pathsList.innerHTML = "";
 
@@ -357,48 +379,52 @@ function displayShortestPaths(data) {
     document.getElementById("shortest-paths").style.display = "block";
 }
 
-document.getElementById("give-up-btn").addEventListener("click", function() {
+document.getElementById("give-up-btn").addEventListener("click", function () {
     fetch("/give-up", {
-        method: 'POST', // Add this line to specify the HTTP method
+        method: "POST", // Add this line to specify the HTTP method
         headers: {
-            'Content-Type': 'application/json'
-        }
+            "Content-Type": "application/json",
+        },
     })
-    .then(response => response.json())
-    .then(data => {
-        displayShortestPaths(data);
-    });
+        .then((response) => response.json())
+        .then((data) => {
+            displayShortestPaths(data);
+        });
 });
 
 // Button listeners
-document.getElementById("easy").addEventListener("click", function() {
+document.getElementById("easy").addEventListener("click", function () {
     document.getElementById("easy").disabled = true;
     saveGameState();
     currentDifficulty = "easy";
     updateDifficultyButtonState(currentDifficulty);
     initializeGame(currentDifficulty);
-    document.getElementById("easy").disabled = false;});
-document.getElementById("medium").addEventListener("click", function() {
+    document.getElementById("easy").disabled = false;
+});
+document.getElementById("medium").addEventListener("click", function () {
     document.getElementById("medium").disabled = true;
     saveGameState();
     currentDifficulty = "medium";
     updateDifficultyButtonState(currentDifficulty);
-    initializeGame(currentDifficulty);  
-    document.getElementById("medium").disabled = false;});
-document.getElementById("hard").addEventListener("click", function() {
+    initializeGame(currentDifficulty);
+    document.getElementById("medium").disabled = false;
+});
+document.getElementById("hard").addEventListener("click", function () {
     document.getElementById("hard").disabled = true;
     saveGameState();
     currentDifficulty = "hard";
     updateDifficultyButtonState(currentDifficulty);
-    initializeGame(currentDifficulty); 
-    document.getElementById("hard").disabled = false;});
-document.getElementById("infinite").addEventListener("click", function() {
+    initializeGame(currentDifficulty);
+    document.getElementById("hard").disabled = false;
+});
+document.getElementById("infinite").addEventListener("click", function () {
     currentDifficulty = "infinite";
-    initializeGame("infinite"); });
+    initializeGame("infinite");
+});
 
 // Function to copy score to clipboard
 function copyScoreToClipboard() {
-    const easyScore = scores.easy || 0; 
+    const easyScore = scores.easy || 0;
     const mediumScore = scores.medium || 0;
     const hardScore = scores.hard || 0;
     const scoreValue = document.getElementById("share-score-value").textContent;
@@ -406,39 +432,46 @@ function copyScoreToClipboard() {
     textArea.value = `I scored ${easyScore}, ${mediumScore} and ${hardScore} on WordWays! Try and beat my score at wordwaysgame.com`;
     document.body.appendChild(textArea);
     textArea.select();
-    document.execCommand('copy');
+    document.execCommand("copy");
     document.body.removeChild(textArea);
-    document.getElementById("copy-success").style.display = "block";  // Display success message
-    setTimeout(() => {  // Hide success message after 2 seconds
+    document.getElementById("copy-success").style.display = "block"; // Display success message
+    setTimeout(() => {
+        // Hide success message after 2 seconds
         document.getElementById("copy-success").style.display = "none";
     }, 2000);
 }
-document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);
+document
+    .getElementById("copy-score-btn")
+    .addEventListener("click", copyScoreToClipboard);
 
 function saveGameState() {
     console.log("saveGameState called");
 
     // Hide all definition elements before saving
-    const definitionElements = document.querySelectorAll('.tooltip');
-    definitionElements.forEach(element => {
-        element.style.display = 'none';
+    const definitionElements = document.querySelectorAll(".tooltip");
+    definitionElements.forEach((element) => {
+        element.style.display = "none";
     });
-    
+
     let currentScore = parseInt(document.getElementById("score").textContent);
     let gameBoardHTML = document.getElementById("game-board").innerHTML;
     let gameBoard = document.getElementById("game-board");
-    let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
-    let guessedWords = []
+    let historyRows = gameBoard.querySelectorAll(
+        ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
+    );
+    let guessedWords = [];
     let difficultyButtonStates = {
-        easy: document.getElementById('easy').classList.value,
-        medium: document.getElementById('medium').classList.value,
-        hard: document.getElementById('hard').classList.value
+        easy: document.getElementById("easy").classList.value,
+        medium: document.getElementById("medium").classList.value,
+        hard: document.getElementById("hard").classList.value,
         // Add other difficulty levels if you have more
     };
 
     for (let row of historyRows) {
         // add data-word of each row to guessedWords
-        guessedWords.push(row.querySelector(".letter-box").getAttribute("data-word"));
+        guessedWords.push(
+            row.querySelector(".letter-box").getAttribute("data-word")
+        );
     }
 
     if (!guessedWords || guessedWords.length === 0) {
@@ -450,11 +483,13 @@ function saveGameState() {
         gameBoardHTML: document.getElementById("game-board").innerHTML,
         score: currentScore,
         historyRows: guessedWords,
-        lastWord: lastWord
+        lastWord: lastWord,
     };
 
-    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
-    let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
+    var tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+    let currentDate = new Date(Date.now() - tzoffset)
+        .toISOString()
+        .slice(0, 10); // YYYY-MM-DD format
 
     // Update scores variable for current difficulty
     if (currentDifficulty === "easy") {
@@ -468,9 +503,15 @@ function saveGameState() {
     console.log("Scores: ", scores);
 
     localStorage.setItem(`scores`, JSON.stringify(scores));
-    localStorage.setItem(`wordwaysGameState_${currentDifficulty}`, JSON.stringify(gameState));
+    localStorage.setItem(
+        `wordwaysGameState_${currentDifficulty}`,
+        JSON.stringify(gameState)
+    );
     localStorage.setItem(`lastPlayedDate_${currentDifficulty}`, currentDate);
-    localStorage.setItem(`difficultyButtonStates`, JSON.stringify(difficultyButtonStates))
+    localStorage.setItem(
+        `difficultyButtonStates`,
+        JSON.stringify(difficultyButtonStates)
+    );
 
     console.log("Saved state: ", gameState);
     console.log("Saved on: ", currentDate);
@@ -479,53 +520,75 @@ function saveGameState() {
 function loadGameState(difficulty) {
     let savedState = localStorage.getItem(`wordwaysGameState_${difficulty}`);
     let lastPlayedDate = localStorage.getItem(`lastPlayedDate_${difficulty}`);
-    var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
-    let currentDate = (new Date(Date.now() - tzoffset)).toISOString().slice(0,10); // YYYY-MM-DD format
+    var tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds. This is to get the date in the local timezone.
+    let currentDate = new Date(Date.now() - tzoffset)
+        .toISOString()
+        .slice(0, 10); // YYYY-MM-DD format
     let savedButtonStates = localStorage.getItem(`difficultyButtonStates`);
     scores = JSON.parse(localStorage.getItem(`scores`));
     if (!scores) {
         scores = {
             easy: 0,
             medium: 0,
-            hard: 0
-        }
+            hard: 0,
+        };
     }
-    console.log('Loaded scores: ', scores)
+    console.log("Loaded scores: ", scores);
 
     console.log("loadGameState called for difficulty:", difficulty);
-    console.log("Last Played Date: ", lastPlayedDate, "Current Date: ", currentDate);
+    console.log(
+        "Last Played Date: ",
+        lastPlayedDate,
+        "Current Date: ",
+        currentDate
+    );
 
-    if ((savedState && lastPlayedDate === currentDate) && (difficulty != "infinite")) {
+    if (
+        savedState &&
+        lastPlayedDate === currentDate &&
+        difficulty != "infinite"
+    ) {
         let gameState = JSON.parse(savedState);
-        document.getElementById("game-board").innerHTML = gameState.gameBoardHTML;
+        document.getElementById("game-board").innerHTML =
+            gameState.gameBoardHTML;
         score = gameState.score;
         document.getElementById("score").textContent = score;
 
         // search for last guessed word in HTML
         let gameBoard = document.getElementById("game-board");
-        let historyRows = gameBoard.querySelectorAll(".word-row:not(#start-word-row, #input-word-row, #end-word-row)");
-        let guessedWords = []
+        let historyRows = gameBoard.querySelectorAll(
+            ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
+        );
+        let guessedWords = [];
         for (let row of historyRows) {
             // add data-word of each row to guessedWords
-            guessedWords.push(row.querySelector(".letter-box").getAttribute("data-word"));
+            guessedWords.push(
+                row.querySelector(".letter-box").getAttribute("data-word")
+            );
             // add hover to each letter-box for guessed words
             let letterBox = row.querySelector(".letter-box");
             addHoverToWord(letterBox);
         }
 
         // add hover to each letter-box for start and target words
-        let startWordLetterBoxes = document.querySelectorAll("#start-word-row .letter-box");
+        let startWordLetterBoxes = document.querySelectorAll(
+            "#start-word-row .letter-box"
+        );
         for (let letterBox of startWordLetterBoxes) {
             addHoverToWord(letterBox);
         }
-        let endWordLetterBoxes = document.querySelectorAll("#end-word-row .letter-box");
+        let endWordLetterBoxes = document.querySelectorAll(
+            "#end-word-row .letter-box"
+        );
         for (let letterBox of endWordLetterBoxes) {
             addHoverToWord(letterBox);
         }
-    
+
         // Check if words were guessed
         if (historyRows.length > 0) {
-            let lastGuessedWord = historyRows[historyRows.length - 1].querySelector(".letter-box").getAttribute("data-word");
+            let lastGuessedWord = historyRows[historyRows.length - 1]
+                .querySelector(".letter-box")
+                .getAttribute("data-word");
 
             // If lastword = target word add win affect and disable undo/submit
             if (lastGuessedWord === endWord) {
@@ -542,35 +605,35 @@ function loadGameState(difficulty) {
             // if Hard mode is finished, add share score section
             if (difficulty === "hard" && lastGuessedWord === endWord) {
                 document.getElementById("share-score").style.display = "block";
-                document.getElementById("share-score-value").textContent = scores.hard;
+                document.getElementById("share-score-value").textContent =
+                    scores.hard;
             }
         }
-        
+
         if (savedButtonStates) {
             let buttonStates = JSON.parse(savedButtonStates);
 
             // Apply saved class lists to each button
-            Object.keys(buttonStates).forEach(difficulty => {
+            Object.keys(buttonStates).forEach((difficulty) => {
                 const button = document.getElementById(difficulty);
-                button.className = ''; // Clear existing classes
+                button.className = ""; // Clear existing classes
                 button.classList.value = buttonStates[difficulty];
             });
         }
 
         // Send the loaded state to the backend
         fetch(`/load-game-state`, {
-            method: 'POST',
+            method: "POST",
             body: JSON.stringify({
-                'difficulty': difficulty,
-                'score': gameState.score,
-                'historyRows': guessedWords,
-                'lastWord': gameState.lastWord
+                difficulty: difficulty,
+                score: gameState.score,
+                historyRows: guessedWords,
+                lastWord: gameState.lastWord,
             }),
             headers: {
-                'Content-Type': 'application/json'
-            }
+                "Content-Type": "application/json",
+            },
         });
-
 
         console.log("Game state loaded");
     } else {
@@ -580,7 +643,7 @@ function loadGameState(difficulty) {
     }
 }
 
-function clearAllStates(){ 
+function clearAllStates() {
     console.log("clearAllStates called");
-    localStorage.clear(); 
+    localStorage.clear();
 }

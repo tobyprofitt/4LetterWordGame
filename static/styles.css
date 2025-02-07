@@ -38,7 +38,7 @@ input[type="text"] {
 button {
     padding: 10px 15px;
     font-size: 16px;
-    background-color: #007BFF;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
@@ -52,17 +52,39 @@ button:hover {
 
 /* Shake animation */
 @keyframes shake {
-    0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-    20% { transform: translate(-2px, 0px) rotate(1deg); }
-    30% { transform: translate(1px, 2px) rotate(0deg); }
-    40% { transform: translate(1px, -1px) rotate(1deg); }
-    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-    60% { transform: translate(-1px, 1px) rotate(0deg); }
-    70% { transform: translate(1px, 1px) rotate(-1deg); }
-    80% { transform: translate(-1px, -1px) rotate(1deg); }
-    90% { transform: translate(1px, 2px) rotate(0deg); }
-    100% { transform: translate(1px, -2px) rotate(-1deg); }
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+    10% {
+        transform: translate(-1px, -2px) rotate(-1deg);
+    }
+    20% {
+        transform: translate(-2px, 0px) rotate(1deg);
+    }
+    30% {
+        transform: translate(1px, 2px) rotate(0deg);
+    }
+    40% {
+        transform: translate(1px, -1px) rotate(1deg);
+    }
+    50% {
+        transform: translate(-1px, 2px) rotate(-1deg);
+    }
+    60% {
+        transform: translate(-1px, 1px) rotate(0deg);
+    }
+    70% {
+        transform: translate(1px, 1px) rotate(-1deg);
+    }
+    80% {
+        transform: translate(-1px, -1px) rotate(1deg);
+    }
+    90% {
+        transform: translate(1px, 2px) rotate(0deg);
+    }
+    100% {
+        transform: translate(1px, -2px) rotate(-1deg);
+    }
 }
 
 .shake {
@@ -73,31 +95,47 @@ button:hover {
 /* Error message styling */
 #error-message {
     display: none;
-    background-color: #e57373;  /* Semi-transparent red background */
-    color: white;             /* White text color */
-    margin: 10px 0;             /* Margin around the error message */
-    padding: 10px;              /* Padding inside the error message */
-    text-align: center;         /* Centered text */
-    border-radius: 5px;         /* Rounded corners */
-    font-size: 1.1em;           /* Slightly larger font */
+    background-color: #e57373; /* Semi-transparent red background */
+    color: white; /* White text color */
+    margin: 10px 0; /* Margin around the error message */
+    padding: 10px; /* Padding inside the error message */
+    text-align: center; /* Centered text */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 1.1em; /* Slightly larger font */
 }
 
 /* Color gradient background */
 @keyframes gradientBackground {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Pulsing effect */
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 0.7; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.7; }
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
 }
 
 .win-effect {
-    animation: gradientBackground 5s ease infinite, pulse 1s ease-in-out infinite;
+    animation: gradientBackground 5s ease infinite,
+        pulse 1s ease-in-out infinite;
     background: linear-gradient(270deg, #83a4d4, #b6fbff);
     background-size: 200% 200%;
 }
@@ -162,22 +200,22 @@ button:hover {
 
 .helper-btn {
     font-size: 20px;
-    background-color: #007BFF;  /* Light gray background */
-    border: 2px solid #d1d5db;  /* Gray border */
-    border-radius: 50%;         /* Make it circular */
-    width: 30px;                /* Fixed width */
-    height: 30px;               /* Fixed height */
-    display: flex;              /* Center the question mark */
-    align-items: center;        /* Center vertically */
-    justify-content: center;    /* Center horizontally */
+    background-color: #007bff; /* Light gray background */
+    border: 2px solid #d1d5db; /* Gray border */
+    border-radius: 50%; /* Make it circular */
+    width: 30px; /* Fixed width */
+    height: 30px; /* Fixed height */
+    display: flex; /* Center the question mark */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
     cursor: pointer;
     margin: 10px;
     transition: background-color 0.3s, color 0.3s;
 }
 
 .helper-btn:hover {
-    background-color: #e5e7eb;  /* Slightly darker gray on hover */
-    color: #83a4d4;             /* Change the color of question mark on hover */
+    background-color: #e5e7eb; /* Slightly darker gray on hover */
+    color: #83a4d4; /* Change the color of question mark on hover */
 }
 
 .modal {
@@ -257,16 +295,16 @@ button:hover {
 }
 
 .difficulty-button {
-    background-color: grey;  /* default color when game is not started */
+    background-color: grey; /* default color when game is not started */
     /* ... other styles ... */
 }
 
 .difficulty-button.active {
-    background-color: #007BFF;  /* color when the level is active */
+    background-color: #007bff; /* color when the level is active */
 }
 
 .difficulty-button.completed {
-    background-color: green;  /* color when the level is completed */
+    background-color: green; /* color when the level is completed */
 }
 
 #share-score {
@@ -279,7 +317,7 @@ button:hover {
 #copy-score-btn {
     padding: 10px 20px;
     cursor: pointer;
-    background-color: #007BFF;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
