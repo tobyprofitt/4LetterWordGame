@@ -153,10 +153,10 @@ function updateDifficultyButtonState(difficulty, completion) {
 function populateWordSquares(prefix, word) {
     for (let i = 0; i < word.length; i++) {
         document.getElementById(prefix + (i + 1)).textContent = word[i];
-        // add definition to letter-boxes
-        let letterBox = document.getElementById(prefix + (i + 1));
-        letterBox.setAttribute("data-word", word);
-        addHoverToWord(letterBox);
+        // add definition to celles
+        let cell = document.getElementById(prefix + (i + 1));
+        cell.setAttribute("data-word", word);
+        addHoverToWord(cell);
     }
 }
 
@@ -166,12 +166,12 @@ function addGuessToHistory(guess) {
     newRow.className = "word-row";
 
     for (let i = 0; i < guess.length; i++) {
-        let letterBox = document.createElement("div");
-        letterBox.className = "letter-box";
-        letterBox.textContent = guess[i];
-        letterBox.setAttribute("data-word", guess);
-        newRow.appendChild(letterBox);
-        addHoverToWord(letterBox);
+        let cell = document.createElement("div");
+        cell.className = "cell guess";
+        cell.textContent = guess[i];
+        cell.setAttribute("data-word", guess);
+        newRow.appendChild(cell);
+        addHoverToWord(cell);
     }
 
     // Insert the new history row just above the input word row
@@ -469,9 +469,7 @@ function saveGameState() {
 
     for (let row of historyRows) {
         // add data-word of each row to guessedWords
-        guessedWords.push(
-            row.querySelector(".letter-box").getAttribute("data-word")
-        );
+        guessedWords.push(row.querySelector(".cell").getAttribute("data-word"));
     }
 
     if (!guessedWords || guessedWords.length === 0) {
@@ -563,31 +561,29 @@ function loadGameState(difficulty) {
         for (let row of historyRows) {
             // add data-word of each row to guessedWords
             guessedWords.push(
-                row.querySelector(".letter-box").getAttribute("data-word")
+                row.querySelector(".cell").getAttribute("data-word")
             );
-            // add hover to each letter-box for guessed words
-            let letterBox = row.querySelector(".letter-box");
-            addHoverToWord(letterBox);
+            // add hover to each cell for guessed words
+            let cell = row.querySelector(".cell");
+            addHoverToWord(cell);
         }
 
-        // add hover to each letter-box for start and target words
-        let startWordLetterBoxes = document.querySelectorAll(
-            "#start-word-row .letter-box"
+        // add hover to each cell for start and target words
+        let startWordcelles = document.querySelectorAll(
+            "#start-word-row .cell"
         );
-        for (let letterBox of startWordLetterBoxes) {
-            addHoverToWord(letterBox);
+        for (let cell of startWordcelles) {
+            addHoverToWord(cell);
         }
-        let endWordLetterBoxes = document.querySelectorAll(
-            "#end-word-row .letter-box"
-        );
-        for (let letterBox of endWordLetterBoxes) {
-            addHoverToWord(letterBox);
+        let endWordcelles = document.querySelectorAll("#end-word-row .cell");
+        for (let cell of endWordcelles) {
+            addHoverToWord(cell);
         }
 
         // Check if words were guessed
         if (historyRows.length > 0) {
             let lastGuessedWord = historyRows[historyRows.length - 1]
-                .querySelector(".letter-box")
+                .querySelector(".cell")
                 .getAttribute("data-word");
 
             // If lastword = target word add win affect and disable undo/submit

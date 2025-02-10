@@ -1,8 +1,7 @@
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
-    padding: 50px;
+    background-color: #f9f9f9;
 }
 
 h1 {
@@ -13,19 +12,39 @@ h1 {
 .word-row {
     display: flex;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
-.letter-box {
-    width: 40px;
-    height: 40px;
-    display: inline-block;
-    border: 2px solid #000;
+/* cell states */
+
+.cell {
+    display: flex;
+    justify-content: center; /* Horizontally centers items */
+    align-items: center;
+    width: 44px;
+    height: 44px;
     font-size: 20px;
-    text-align: center;
+    font-weight: bold;
     line-height: 40px;
-    margin: 0 5px;
+    margin: 0 4px;
     background-color: #fff;
+    border-radius: 5px;
+}
+
+.guess {
+    background-color: #939b9f;
+    border: 2px solid #939b9f;
+    color: #fff; /* white text */
+}
+
+.input {
+    background-color: #ffffff;
+    border: 2px solid #f1f1f1;
+}
+
+.end {
+    background-color: #f1f1f1;
+    border: 2px solid #f1f1f1;
 }
 
 input[type="text"] {
