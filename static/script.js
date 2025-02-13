@@ -10,6 +10,37 @@ var tzoffset = new Date().getTimezoneOffset() * 60000; //offset in milliseconds.
 let currentDate = new Date(Date.now() - tzoffset).toISOString().slice(0, 10); // YYYY-MM-DD format
 let wordDefinitions = {};
 
+// Get a reference to the container where the letters will be displayed
+const letterContainer = document.getElementById("test-container");
+const inputWord = [];
+
+// Typing listener
+document.addEventListener("keydown", function (event) {
+    console.log("inputWord: ", inputWord);
+    const nextCell = document.getElementById("input-letter-" + (inputWord.length + 1));
+    const prevCell = document.getElementById("input-letter-" + inputWord.length);
+
+    // Letters only
+    const isLetter = /^[A-Za-z]$/.test(event.key);
+
+    // Backspace
+    if (prevCell && event.key === "Backspace") {
+        prevCell.textContent = "";
+        inputWord.pop();
+    }
+
+    // Add letter
+    else if (nextCell && isLetter && inputWord.length < 4) {
+        nextCell.textContent = event.key.toUpperCase();
+        inputWord.push(event.key.toUpperCase());
+    }
+
+    // Enter
+    else if (event.key === "Enter") {
+        submitWord();
+    }
+});
+
 document.addEventListener("DOMContentLoaded", function () {
     //clearAllStates();
 

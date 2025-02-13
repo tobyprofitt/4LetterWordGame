@@ -83,6 +83,11 @@ def play_move():
     score = session['score']
     current_word = session['current_word']
 
+    print("move: ", move)
+    print("frontend_score: ", frontend_score)
+    print("score: ", score)
+    print("current_word: ", current_word)
+
     # If the received score is less than the backend's score, 
     # it means the user has used the "Undo" button.
     # Update the backend's score to match the frontend's score
