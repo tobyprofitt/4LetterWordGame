@@ -16,7 +16,6 @@ const inputWord = [];
 
 // Typing listener
 document.addEventListener("keydown", function (event) {
-    console.log("inputWord: ", inputWord);
     const nextCell = document.getElementById("input-letter-" + (inputWord.length + 1));
     const prevCell = document.getElementById("input-letter-" + inputWord.length);
 
@@ -39,6 +38,7 @@ document.addEventListener("keydown", function (event) {
     else if (event.key === "Enter") {
         submitWord();
     }
+    console.log("inputWord: ", inputWord);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -73,15 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // console log to check if the script is loaded
     console.log("script.js loaded");
 });
-
-document
-    .getElementById("user-input")
-    .addEventListener("keyup", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            submitWord();
-        }
-    });
 
 function loadWordDefinitions() {
     // Path to your word_definitions.json file
@@ -136,7 +127,7 @@ function clearBoard() {
     }
     gameBoard.classList.remove("win-effect");
     document.getElementById("score").textContent = 0;
-    document.getElementById("user-input").disabled = false;
+
     /* Drop the restart prompt */
     let restartPrompt = document.getElementById("restart-prompt");
     if (restartPrompt) {
@@ -150,7 +141,6 @@ function clearBoard() {
 
 function initializeGame(difficulty = "easy") {
     document.getElementById("undo-btn").disabled = false;
-    document.getElementById("submit-btn").disabled = false;
     currentDifficulty = difficulty;
     console.log("initializeGame called");
     clearBoard();
@@ -246,7 +236,7 @@ function undoLastMove() {
 }
 
 function submitWord() {
-    let userInput = document.getElementById("user-input").value.toUpperCase();
+    let userInput = inputWord.join("");
     let currentScore = parseInt(document.getElementById("score").textContent);
     let errorMessage = document.getElementById("error-message");
     let inputWordRow = document.getElementById("input-word-row");
@@ -265,6 +255,10 @@ function submitWord() {
         .then((response) => response.json())
         .then((data) => {
             if (data.valid) {
+
+                // Clear the input word
+                inputWord.length = 0;
+
                 // Increment the score
                 document.getElementById("score").textContent = data.score;
                 currentScore = data.score;
@@ -286,7 +280,6 @@ function submitWord() {
                 }
 
                 document.getElementById("score").textContent = data.score;
-                document.getElementById("user-input").value = ""; // Clear the input
 
                 // Check if user reached the target word
                 if (userInput === endWord) {
