@@ -4,47 +4,42 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>WordWays</title>
-        <link
-            rel="stylesheet"
-            href="{{ url_for('static', filename='styles.css') }}"
-        />
-        <script
-            defer
-            src="{{ url_for('static', filename='script.js') }}"
-        ></script>
-        <link
-            rel="icon"
-            href="{{ url_for('static', filename='favicon.ico') }}"
-            type="image/x-icon"
-        />
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+        <script src="https://kit.fontawesome.com/16900119b7.js" crossorigin="anonymous"></script>
+        <script defer src="{{ url_for('static', filename='script.js') }}"></script>
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
     </head>
     <body onload="initializeGame()">
-        <h1>WordWays</h1>
-        <div class="helper-container">
-            <button id="rules-btn" class="helper-btn">?</button>
-        </div>
+        <div class="page-container">
+            <!-- Header + Levels -->
+            <div class="header-levels-container">
+                <!-- Header -->
+                <div class="header-container">
+                    <button id="rules-btn" class="icon-btn"><i class="fa-solid fa-circle-question fa-lg"></i></button>
+                    <h2 class="title">WordWays</h2>
+                </div>
 
-        <div id="share-score" style="display: none">
-            <p>Congratulations on your win!</p>
-            <p>Your score: <span id="share-score-value"></span></p>
-            <button id="copy-score-btn">Copy Score to Clipboard</button>
-            <p id="copy-success" style="color: green; display: none">
-                Score copied!
-            </p>
-        </div>
-
-        <button id="easy" class="difficulty-button active">Easy</button>
-        <button id="medium" class="difficulty-button">Medium</button>
-        <button id="hard" class="difficulty-button">Hard</button>
-        <button id="infinite" class="difficulty-button">Infinite</button>
-
-        <br /><br />
-
-        <!-- Helper Modal -->
-        <div class="modal" id="helperModal">
-            <div class="modal-content">
-                <span class="close-button">&times;</span>
-                <h2>How to Play WordWays</h2>
+                <!-- Levels -->
+                <div class="levels-container">
+                    <button id="easy" class="icon-btn active">1</button>
+                    <button id="medium" class="icon-btn locked">2</button>
+                    <button id="hard" class="icon-btn completed">3</button>
+                    <div class="v-divider"></div>
+                    <button id="infinite" class="icon-btn active"><i class="fa-solid fa-infinity"></i></button>
+                </div>
+            </div>
+            <!-- Share -->
+            <div id="share-score" style="display: none">
+                <p>Congratulations on your win!</p>
+                <p>Your score: <span id="share-score-value"></span></p>
+                <button id="copy-score-btn">Copy Score to Clipboard</button>
+                <p id="copy-success" style="color: green; display: none">Score copied!</p>
+            </div>
+            <!-- Helper Modal -->
+            <div class="modal" id="helperModal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>How to Play WordWays</h2>
                 <p>
                     In WordWays, your task is to transform a starting word into
                     a target word. You can change one letter at a time, and
@@ -52,37 +47,37 @@
                     rearrange the letters of a word to form another valid word.
                 </p>
 
-                <!-- Visual example -->
-                <div class="example">
-                    <h3>Example:</h3>
-                    <div class="word-box">
-                        <div class="cell">L</div>
-                        <div class="cell">I</div>
-                        <div class="cell">M</div>
-                        <div class="cell">E</div>
+                    <!-- Visual example -->
+                    <div class="example">
+                        <h3>Example:</h3>
+                        <div class="word-box">
+                            <div class="cell">L</div>
+                            <div class="cell">I</div>
+                            <div class="cell">M</div>
+                            <div class="cell">E</div>
+                        </div>
+                        <p>&darr; (rearrange)</p>
+                        <div class="word-box">
+                            <div class="cell">M</div>
+                            <div class="cell">I</div>
+                            <div class="cell">L</div>
+                            <div class="cell">E</div>
+                        </div>
+                        <p>&darr;</p>
+                        <div class="word-box">
+                            <div class="cell">M</div>
+                            <div class="cell">I</div>
+                            <div class="cell">L</div>
+                            <div class="cell">K</div>
+                        </div>
+                        <p>&darr;</p>
+                        <div class="word-box">
+                            <div class="cell">S</div>
+                            <div class="cell">I</div>
+                            <div class="cell">L</div>
+                            <div class="cell">K</div>
+                        </div>
                     </div>
-                    <p>&darr; (rearrange)</p>
-                    <div class="word-box">
-                        <div class="cell">M</div>
-                        <div class="cell">I</div>
-                        <div class="cell">L</div>
-                        <div class="cell">E</div>
-                    </div>
-                    <p>&darr;</p>
-                    <div class="word-box">
-                        <div class="cell">M</div>
-                        <div class="cell">I</div>
-                        <div class="cell">L</div>
-                        <div class="cell">K</div>
-                    </div>
-                    <p>&darr;</p>
-                    <div class="word-box">
-                        <div class="cell">S</div>
-                        <div class="cell">I</div>
-                        <div class="cell">L</div>
-                        <div class="cell">K</div>
-                    </div>
-                </div>
 
                 <p>
                     Every move increases your score by one. Try to transform the
@@ -95,18 +90,18 @@
                     Medium to start a harder challenge, finally move on to Hard
                     mode the same way.
                 </p>
-                <p>
-                    For a full list of valid 4-letter words, refer to this
+                    <p>
+                        For a full list of valid 4-letter words, refer to this
                     <a
                         href="https://www.wordsdetail.com/4-letter-words/"
                         target="_blank"
                         >dictionary</a
                     >.
-                </p>
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <div id="error-message"></div>
+            <div id="error-message"></div>
         <div
             id="difficulty-error-message"
             style="display: none; color: red; margin-top: 10px"
@@ -114,52 +109,53 @@
             Please complete the current difficulty first!
         </div>
 
-        <div id="game-board">
-            <!-- Starting word -->
-            <div class="word-row" id="start-word-row">
-                <div class="cell guess" id="start-letter-1"></div>
-                <div class="cell guess" id="start-letter-2"></div>
-                <div class="cell guess" id="start-letter-3"></div>
-                <div class="cell guess" id="start-letter-4"></div>
+            <div id="game-board">
+                <!-- Starting word -->
+                <div class="word-row" id="start-word-row">
+                    <div class="cell guess" id="start-letter-1"></div>
+                    <div class="cell guess" id="start-letter-2"></div>
+                    <div class="cell guess" id="start-letter-3"></div>
+                    <div class="cell guess" id="start-letter-4"></div>
+                </div>
+
+                <!-- User's guess history will be dynamically added here -->
+
+                <!-- Input squares for user's current guess -->
+                <div class="word-row" id="input-word-row">
+                    <div class="cell input" id="input-letter-1"></div>
+                    <div class="cell input" id="input-letter-2"></div>
+                    <div class="cell input" id="input-letter-3"></div>
+                    <div class="cell input" id="input-letter-4"></div>
+                </div>
+
+                <!-- Dots separator -->
+                <div style="text-align: center; margin: 20px 0">...</div>
+
+                <!-- Target word -->
+                <div class="word-row" id="end-word-row">
+                    <div class="cell end" id="end-letter-1"></div>
+                    <div class="cell end" id="end-letter-2"></div>
+                    <div class="cell end" id="end-letter-3"></div>
+                    <div class="cell end" id="end-letter-4"></div>
+                </div>
             </div>
 
-            <!-- User's guess history will be dynamically added here -->
-
-            <!-- Input squares for user's current guess -->
-            <div class="word-row" id="input-word-row">
-                <div class="cell input" id="input-letter-1"></div>
-                <div class="cell input" id="input-letter-2"></div>
-                <div class="cell input" id="input-letter-3"></div>
-                <div class="cell input" id="input-letter-4"></div>
+            <!-- User Input -->
+            <div>
+                <button onclick="undoLastMove()" id="undo-btn">Undo</button>
             </div>
 
-            <!-- Dots separator -->
-            <div style="text-align: center; margin: 20px 0">...</div>
+            <h2>Score: <span id="score">0</span></h2>
 
-            <!-- Target word -->
-            <div class="word-row" id="end-word-row">
-                <div class="cell end" id="end-letter-1"></div>
-                <div class="cell end" id="end-letter-2"></div>
-                <div class="cell end" id="end-letter-3"></div>
-                <div class="cell end" id="end-letter-4"></div>
+            <div id="game-controls">
+                <button id="give-up-btn">Give Up?</button>
             </div>
-        </div>
 
-        <!-- User Input -->
-        <div>
-            <button onclick="undoLastMove()" id="undo-btn">Undo</button>
-        </div>
-
-        <h2>Score: <span id="score">0</span></h2>
-
-        <div id="game-controls">
-            <button id="give-up-btn">Give Up?</button>
-        </div>
-
-        <div id="shortest-paths">
-            <h3>Shortest Path(s):</h3>
-            <ul id="paths-list"></ul>
-            <p>Optimal Score: <span id="optimal-score"></span></p>
+            <div id="shortest-paths">
+                <h3>Shortest Path(s):</h3>
+                <ul id="paths-list"></ul>
+                <p>Optimal Score: <span id="optimal-score"></span></p>
+            </div>
         </div>
     </body>
 </html>
