@@ -1,7 +1,8 @@
 :root {
-    /* Page colours */
+    /* Background colours */
     --page-light: #fbfbfb;
     --grey: #f1f1f1;
+    --page-dark: var(--text-dark);
 
     /* Game colours */
     --match: #66a060;
@@ -384,6 +385,10 @@ input[type="text"] {
 
 .locked {
     color: var(--text-disabled);
+}
+
+.selected {
+    border: 2px solid var(--page-dark);
 }
 
 .difficulty.active {

@@ -431,7 +431,25 @@ document.getElementById("give-up-btn").addEventListener("click", function () {
         });
 });
 
+// Level button selection listener
+const levelButtons = document.getElementsByClassName("level");
+
+for (let btn of levelButtons) {
+    btn.addEventListener("click", function() {
+
+        // Deselect the other levels
+        const currentSelected = document.getElementsByClassName("selected");
+        for (let btn of currentSelected) {
+            btn.classList.remove("selected");
+        }
+
+        // Select this level
+        btn.classList.add("selected");
+    });
+};
+
 // Button listeners
+// TODO: refactor these
 document.getElementById("easy").addEventListener("click", function () {
     document.getElementById("easy").disabled = true;
     saveGameState();
