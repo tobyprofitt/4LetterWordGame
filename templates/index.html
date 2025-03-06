@@ -121,7 +121,7 @@
                 <!-- User's guess history will be dynamically added here -->
 
                 <!-- Input squares for user's current guess -->
-                <div class="word-row" id="input-word-row">
+                <div class="word-row" id="input-word-row" onClick="focusInput()">
                     <div class="cell input" id="input-letter-1"></div>
                     <div class="cell input" id="input-letter-2"></div>
                     <div class="cell input" id="input-letter-3"></div>
@@ -157,5 +157,7 @@
                 <p>Optimal Score: <span id="optimal-score"></span></p>
             </div>
         </div>
+        <!-- Hidden input field to capture keyboard taps on mobile -->
+        <input id="hiddenMobileInput" type="text" style="position: absolute; opacity: 0; pointer-events: none;" />
     </body>
 </html>

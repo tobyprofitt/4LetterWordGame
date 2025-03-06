@@ -14,32 +14,73 @@ let wordDefinitions = {};
 const letterContainer = document.getElementById("test-container");
 const inputWord = [];
 
-// Typing listener
+// Typing listener for desktop
 document.addEventListener("keydown", function (event) {
+    handleInput(event, false);
+});
+
+// Typing listener for mobile
+document.getElementById("hiddenMobileInput").addEventListener("input", function (event) {
+    handleInput(event, true);
+});
+
+/**
+ * Handles kestrokes and mobile keyboard taps, adding or deleting letters accordingly.
+ * The event listener is different on mobile vs desktop, so we need to handle both cases.
+ */
+function handleInput(event, isMobile) {
+    // TODO: Test this on mobile!
+    const key = isMobile ? event.target.value.slice(-1) : event.key;
     const nextCell = document.getElementById("input-letter-" + (inputWord.length + 1));
     const prevCell = document.getElementById("input-letter-" + inputWord.length);
 
     // Letters only
-    const isLetter = /^[A-Za-z]$/.test(event.key);
+    const isLetter = /^[A-Za-z]$/.test(key);
 
-    // Backspace
-    if (prevCell && event.key === "Backspace") {
-        prevCell.textContent = "";
-        inputWord.pop();
+    // Desktop backspace OR Mobile backspace
+    if (key === "Backspace" || event.inputType === "deleteContentBackward") {
+        backspace(prevCell);
     }
 
     // Add letter
-    else if (nextCell && isLetter && inputWord.length < 4) {
-        nextCell.textContent = event.key.toUpperCase();
-        inputWord.push(event.key.toUpperCase());
-    }
+    else if (isLetter) {addLetter(nextCell, key);}
 
     // Enter
-    else if (event.key === "Enter") {
-        submitWord();
+    else if (key === "Enter") {submitWord();}
+
+    // Clear input to prevent unwanted accumulation
+    if (isMobile) {event.target.value = "";}
+}
+
+/**
+ * Delete a letter from the input word.
+ */
+function backspace(prevCell) {
+    if (prevCell) {
+        prevCell.textContent = "";
+        inputWord.pop();
     }
-    console.log("inputWord: ", inputWord);
-});
+}
+
+/**
+ * Add a letter to the input word.
+ */
+function addLetter(nextCell, key) {
+    if (nextCell && inputWord.length < 4) {
+        nextCell.textContent = key.toUpperCase();
+        inputWord.push(key.toUpperCase());
+    }
+}
+
+/**
+ * Focuses the hidden mobile input field to open the mobile keyboard.
+ */
+function focusInput() {
+    const input = document.getElementById("hiddenMobileInput");
+    input.focus();
+    alert("TEST: Keyboard should open on mobile");
+}
+
 
 document.addEventListener("DOMContentLoaded", function () {
     //clearAllStates();
