@@ -1,6 +1,17 @@
-# 4LetterWordGame
+# WordWays
 
-<https://www.wordsdetail.com/4-letter-words/>
+🎮 **[Play WordWays](http://wordwaysgame.com/)**
+
+WordWays is a word game where the goal is to transform the start word into the target word in as few moves as possible. 
+
+<img width="500" alt="wordways" src="https://github.com/user-attachments/assets/f03c3db5-d3c9-4db6-9b97-d712eb7e4cee" />
+
+You can make two types of moves:
+
+1. Rearrange the letters, or
+2. Swap one letter for a new letter.
+
+Each move must be a valid word in the English dictionary. Specifically, we use [this list](https://www.wordsdetail.com/4-letter-words/) of words.
 
 ## How to run on Mac
 
