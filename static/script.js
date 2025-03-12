@@ -261,7 +261,6 @@ function undoLastMove() {
 function submitWord() {
     let userInput = inputWord.join("");
     let currentScore = parseInt(document.getElementById("score").textContent);
-    let errorMessage = document.getElementById("error-message");
     let inputWordRow = document.getElementById("input-word-row");
 
     // Send the userInput and currentScore to the server for validation
@@ -288,9 +287,6 @@ function submitWord() {
 
                 // Save game state
                 // saveGameState();
-
-                // Hide any previous error message
-                errorMessage.style.display = "none";
 
                 // Add the userInput to the history
                 addGuessToHistory(userInput);
@@ -347,11 +343,6 @@ function submitWord() {
                     saveGameState();
                 }
             } else {
-                // Display error message
-                errorMessage.textContent = "Invalid move. Try again.";
-                errorMessage.style.display = "block";
-                errorMessage.style.opacity = "1"; // Reset opacity to fully visible
-
                 // Apply shake animation to the input boxes
                 inputWordRow.classList.add("shake");
 
@@ -359,21 +350,6 @@ function submitWord() {
                 setTimeout(() => {
                     inputWordRow.classList.remove("shake");
                 }, 500);
-
-                // Fade out the error message after 3 seconds
-                setTimeout(() => {
-                    let fadeEffect = setInterval(function () {
-                        if (!errorMessage.style.opacity) {
-                            errorMessage.style.opacity = "1";
-                        }
-                        if (errorMessage.style.opacity > "0") {
-                            errorMessage.style.opacity -= "0.05";
-                        } else {
-                            clearInterval(fadeEffect);
-                            errorMessage.style.display = "none";
-                        }
-                    }, 50);
-                }, 3000);
             }
         });
 }
