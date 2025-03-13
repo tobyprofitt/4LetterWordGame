@@ -310,12 +310,16 @@ function submitWord() {
                 // Check if user reached the target word
                 if (userInput === endWord) {
                     let gameBoard = document.getElementById("game-board");
-                    gameBoard.classList.add("win-effect");
 
                     // Prevent adding another set of 4 boxes
-                    document.getElementById("user-input").disabled = true;
+                    document.getElementById("input-word-row").style.display = "none";
+                    document.getElementById("ellipsis").style.display = "none";
                     document.getElementById("undo-btn").disabled = true;
-                    document.getElementById("submit-btn").disabled = true;
+
+                    // Make end word green
+                    for (let i = 1; i <= 4; i++) {
+                        document.getElementById("end-letter-" + i).classList.add("full-match");
+                    }
 
                     // Enable the next difficulty
                     if (currentDifficulty === "easy") {

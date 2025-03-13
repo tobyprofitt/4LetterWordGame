@@ -130,7 +130,7 @@ button:hover {
 .guess {
     background-color: #939b9f;
     border: 2px solid #939b9f;
-    color: #fff; /* white text */
+    color: var(--text-light)
 }
 
 .input {
@@ -141,6 +141,12 @@ button:hover {
 .end {
     background-color: #f1f1f1;
     border: 2px solid #f1f1f1;
+}
+
+.full-match {
+    background-color: var(--match);
+    border: 2px solid var(--match);
+    color: var(--text-light);
 }
 
 input[type="text"] {
