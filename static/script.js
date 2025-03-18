@@ -488,6 +488,55 @@ function copyScoreToClipboard() {
 }
 document.getElementById("copy-score-btn").addEventListener("click", copyScoreToClipboard);
 
+// NOTE: Drafting an alternative gameState management in local storage, but I don't think we'll need it.
+//       Try refactoring Toby's code first. Delete this later if we get his working.
+// /**
+//  * Checks if a gameState already exists in memory for today.
+//  * If yes, leave as-is.
+//  * If no, overwrite gameState with a new one.
+//  */
+// function gsInitialize() {
+
+//     let levels = [];
+    
+//     let level = {
+//         name: string,
+//         startWord: 0,
+//         endWord: 0,
+//         guesses: [string],
+//         isCompleted: bool,
+//     }
+    
+    
+//     let GS = {
+//         seed: 'int',
+//         levels: [level]
+//     }
+
+//     localStorage.setItem()
+// }
+
+
+// function gsAddGuess() {
+
+// }
+
+// function gsRemoveGuess() {
+
+// }
+
+// function gsSetLevelComplete() {
+
+// }
+
+// /**
+//  * Check if select level has been completed. 
+//  * TODO: Write function to update the UI accordingly once we check.
+//  */
+// function gsIsLevelComplete() {
+
+// }
+
 function saveGameState() {
     console.log("saveGameState called");
 
@@ -568,98 +617,110 @@ function loadGameState(difficulty) {
     console.log("loadGameState called for difficulty:", difficulty);
     console.log("Last Played Date: ", lastPlayedDate, "Current Date: ", currentDate);
 
-    // if (savedState && lastPlayedDate === currentDate && difficulty != "infinite") {
-    //     let gameState = JSON.parse(savedState);
-    //     document.getElementById("game-board").innerHTML =
-    //         gameState.gameBoardHTML;
-    //     score = gameState.score;
-    //     document.getElementById("score").textContent = score;
+    if (savedState && lastPlayedDate === currentDate && difficulty != "infinite") {
+        let gameState = JSON.parse(savedState);
+        document.getElementById("game-board").innerHTML =
+            gameState.gameBoardHTML;
+        score = gameState.score;
+        document.getElementById("score").textContent = score;
 
-    //     // search for last guessed word in HTML
-    //     let gameBoard = document.getElementById("game-board");
-    //     let historyRows = gameBoard.querySelectorAll(
-    //         ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
-    //     );
-    //     let guessedWords = [];
-    //     for (let row of historyRows) {
-    //         // add data-word of each row to guessedWords
-    //         guessedWords.push(
-    //             row.querySelector(".cell").getAttribute("data-word")
-    //         );
-    //         // add hover to each cell for guessed words
-    //         let cell = row.querySelector(".cell");
-    //         addHoverToWord(cell);
-    //     }
+        // NOTE: Removed. Getting guessed words from gameState instead of searching HTML
+        // // search for last guessed word in HTML
+        // let gameBoard = document.getElementById("game-board");
+        // let historyRows = gameBoard.querySelectorAll(
+        //     ".word-row:not(#start-word-row, #input-word-row, #end-word-row)"
+        // );
+        
+        let guessedWords = [];
+        for (let row of gameState.historyRows) {
+            guessedWords.push(row)
 
-    //     // add hover to each cell for start and target words
-    //     let startWordcelles = document.querySelectorAll(
-    //         "#start-word-row .cell"
-    //     );
-    //     for (let cell of startWordcelles) {
-    //         addHoverToWord(cell);
-    //     }
-    //     let endWordcelles = document.querySelectorAll("#end-word-row .cell");
-    //     for (let cell of endWordcelles) {
-    //         addHoverToWord(cell);
-    //     }
+            // TODO: fix hover tooltip here
+            // // add data-word of each row to guessedWords
+            // guessedWords.push(
+            //     row.querySelector(".cell").getAttribute("data-word")
+            // );
+            // // add hover to each cell for guessed words
+            // let cell = row.querySelector(".cell");
+            // addHoverToWord(cell);
+        }
 
-    //     // Check if words were guessed
-    //     if (historyRows.length > 0) {
-    //         let lastGuessedWord = historyRows[historyRows.length - 1]
-    //             .querySelector(".cell")
-    //             .getAttribute("data-word");
+        // TODO: Fix this too
+        // // add hover to each cell for start and target words
+        // let startWordcelles = document.querySelectorAll(
+        //     "#start-word-row .cell"
+        // );
+        // for (let cell of startWordcelles) {
+        //     addHoverToWord(cell);
+        // }
+        // let endWordcelles = document.querySelectorAll("#end-word-row .cell");
+        // for (let cell of endWordcelles) {
+        //     addHoverToWord(cell);
+        // }
 
-    //         // If lastword = target word add win affect and disable undo/submit
-    //         if (lastGuessedWord === endWord) {
-    //             let gameBoard = document.getElementById("game-board");
-    //             gameBoard.classList.add("win-effect");
-    //             document.getElementById("user-input").disabled = true;
-    //             document.getElementById("undo-btn").disabled = true;
-    //             document.getElementById("submit-btn").disabled = true;
+        // Check if words were guessed
+        if (guessedWords > 0) {
+            // let lastGuessedWord = historyRows[historyRows.length - 1]
+            //     .querySelector(".cell")
+            //     .getAttribute("data-word");
 
-    //             // Update button colours !!BUG
-    //             updateDifficultyButtonState(difficulty, true);
-    //         }
+            let lastWord = guessedWords[guessedWords.length - 1];
 
-    //         // if Hard mode is finished, add share score section
-    //         if (difficulty === "hard" && lastGuessedWord === endWord) {
-    //             document.getElementById("share-score").style.display = "block";
-    //             document.getElementById("share-score-value").textContent =
-    //                 scores.hard;
-    //         }
-    //     }
+            // If lastword = target word add win affect and disable undo/submit
+            if (lastWord === endWord) {
+                // let gameBoard = document.getElementById("game-board");
+                // gameBoard.classList.add("win-effect");
+                // document.getElementById("user-input").disabled = true;
+                // TODO: make sure this behaves the same way as if we won by submitting a word
+                document.getElementById("undo-btn").disabled = true;
+                document.getElementById("submit-btn").disabled = true;
 
-    //     if (savedButtonStates) {
-    //         let buttonStates = JSON.parse(savedButtonStates);
+                // Update button colours !!BUG
+                // TODO: fix this too
+                // updateDifficultyButtonState(difficulty, true);
+            }
 
-    //         // Apply saved class lists to each button
-    //         Object.keys(buttonStates).forEach((difficulty) => {
-    //             const button = document.getElementById(difficulty);
-    //             button.className = ""; // Clear existing classes
-    //             button.classList.value = buttonStates[difficulty];
-    //         });
-    //     }
+            // TODO: Fix
+            // if Hard mode is finished, add share score section
+            // if (difficulty === "hard" && lastGuessedWord === endWord) {
+            //     document.getElementById("share-score").style.display = "block";
+            //     document.getElementById("share-score-value").textContent =
+            //         scores.hard;
+            // }
+        }
 
-    //     // Send the loaded state to the backend
-    //     fetch(`/load-game-state`, {
-    //         method: "POST",
-    //         body: JSON.stringify({
-    //             difficulty: difficulty,
-    //             score: gameState.score,
-    //             historyRows: guessedWords,
-    //             lastWord: gameState.lastWord,
-    //         }),
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //         },
-    //     });
+        // TODO: Fix this
+        // if (savedButtonStates) {
+        //     let buttonStates = JSON.parse(savedButtonStates);
 
-    //     console.log("Game state loaded");
-    // } else {
-    //     console.log("No saved game state for today, or state is outdated.");
-    //     localStorage.removeItem(`wordwaysGameState_${difficulty}`);
-    //     localStorage.removeItem(`lastPlayedDate_${difficulty}`);
-    // }
+        //     // Apply saved class lists to each button
+        //     Object.keys(buttonStates).forEach((difficulty) => {
+        //         const button = document.getElementById(difficulty);
+        //         button.className = ""; // Clear existing classes
+        //         button.classList.value = buttonStates[difficulty];
+        //     });
+        // }
+
+        // Send the loaded state to the backend
+        fetch(`/load-game-state`, {
+            method: "POST",
+            body: JSON.stringify({
+                difficulty: difficulty,
+                score: gameState.score,
+                historyRows: guessedWords,
+                lastWord: gameState.lastWord,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        console.log("Game state loaded");
+    } else {
+        console.log("No saved game state for today, or state is outdated.");
+        localStorage.removeItem(`wordwaysGameState_${difficulty}`);
+        localStorage.removeItem(`lastPlayedDate_${difficulty}`);
+    }
 }
 
 function clearAllStates() {
