@@ -50,7 +50,7 @@ button:hover {
 .page-container {
     display: flex;
     flex-direction: column;
-    gap: 100px;
+    gap: 50px;
     width: 500px;
     margin-top: 20px;
 }
@@ -271,6 +271,11 @@ input[type="text"] {
 #game-controls {
     margin-top: 20px;
     text-align: center;
+}
+
+#game-board {
+    overflow: auto;
+    height: 300px;
 }
 
 #give-up-btn {
